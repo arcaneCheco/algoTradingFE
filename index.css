@@ -11,4 +11,9 @@
 
 body {
     background: rgb(161, 93, 93);
+    height: 100vh;
+}
+
+#container {
+    height: 100%;
 }

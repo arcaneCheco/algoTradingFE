@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "commonjs",
+    "strict": true,
+    "allowJs": false,
+    "noImplicitAny": true,
+    "noUnusedParameters": false,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "allowUnreachableCode": false,
+    "lib": ["ES2021", "dom"],
+    "strictFunctionTypes": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "paths": {
+      "@src/*": ["./client/src/*"]
+    }
+  }
+}
