@@ -27,6 +27,10 @@ import { PerformanceSummaryTable } from "./PerformanceSummaryTable";
 import { computeDrawdown } from "./computeDrawdown";
 import Chart from "react-apexcharts";
 import { DrawdownPlot } from "./DrawdownPlot";
+import { EquityPlot } from "./EquityPlot";
+import { computeEquity } from "./computeEquity";
+
+// TO-DO: STOP-LOSS, PROFIT-TARGET, SPREAD-COST,
 
 // type CandlesQueryParams = {
 //   count?: number;
@@ -128,7 +132,9 @@ export const App = () => {
   const [performanceSummaryData, setPerformanceSummaryData] =
     useState<PerformanceSummary>({} as PerformanceSummary);
   const [drawdownData, setDrawdownData] = useState<Array<number>>([]);
+  const [equityData, setEquityData] = useState<Array<number>>([]);
   useEffect(() => {
+    // let data = sma(set1.slice(2289), 50);
     let data = sma(set1.slice(2459), 30);
     setCandles(data);
     console.log(data);
@@ -143,12 +149,17 @@ export const App = () => {
     const drawdRes = computeDrawdown(1000, res.trades);
     setDrawdownData(drawdRes);
     console.log(drawdRes);
+
+    const equityRes = computeEquity(1000, res.trades);
+    setEquityData(equityRes);
+    console.log(equityRes);
   }, []);
 
   return (
     <Wrapper>
       <CandlePlot candles={candles} trades={trades} />
       <PerformanceSummaryTable performanceData={performanceSummaryData} />
+      <EquityPlot data={equityData} />
       <DrawdownPlot data={drawdownData} />
     </Wrapper>
   );
