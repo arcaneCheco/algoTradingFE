@@ -134,8 +134,8 @@ export const App = () => {
   const [drawdownData, setDrawdownData] = useState<Array<number>>([]);
   const [equityData, setEquityData] = useState<Array<number>>([]);
   useEffect(() => {
-    // let data = sma(set1.slice(2289), 50);
-    let data = sma(set1.slice(2459), 30);
+    let data = sma(set1.slice(2289), 50);
+    // let data = sma(set1.slice(2459), 30);
     setCandles(data);
     console.log(data);
 
@@ -143,14 +143,14 @@ export const App = () => {
     setTrades(res.trades);
     console.log(res.trades);
 
-    const performance = getPerformanceSummary(1000, res.trades);
+    const performance = getPerformanceSummary(10000, res.trades);
     setPerformanceSummaryData(performance);
 
-    const drawdRes = computeDrawdown(1000, res.trades);
+    const drawdRes = computeDrawdown(10000, res.trades);
     setDrawdownData(drawdRes);
     console.log(drawdRes);
 
-    const equityRes = computeEquity(1000, res.trades);
+    const equityRes = computeEquity(10000, res.trades);
     setEquityData(equityRes);
     console.log(equityRes);
   }, []);

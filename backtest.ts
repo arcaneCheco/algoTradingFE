@@ -1,3 +1,5 @@
+import { profitTarget } from "./profitTarget";
+import { stopLoss } from "./stopLoss";
 import {
   Candle,
   CandleWithSMA,
@@ -8,12 +10,7 @@ import {
 } from "./types/types";
 import { formatRFC3339, formatDistance } from "date-fns";
 
-const calculatePositionValue = (
-  positions: Array<OpenPosition>,
-  currentPrice: number
-) => {
-  // return positions.reduce((total, position) => total + position.amount * currentPrice, 0);
-};
+// TO-DO: STOP-LOSS and PROFIT-TARGET as DOLLAR-AMOUNT instead of PERCENTAGE
 
 const finalizePosition = (
   openPosition: OpenPosition,
@@ -149,7 +146,32 @@ export const backtest = (strategy: Strategy, data: Array<CandleWithSMA>) => {
       },
       candle
     ) => {
-      const signal = strategy(candle);
+      let signal = strategy(candle);
+
+      // STOP-LOSS
+      if (acc.openPositions.length) {
+        const entryPrice = acc.openPositions[0].price;
+        const stopDistancePct = 3;
+        const stopLossSignal = stopLoss(entryPrice, candle.c, stopDistancePct);
+        if (stopLossSignal) {
+          signal = stopLossSignal;
+        }
+      }
+
+      // PROFIT-TARGET
+      if (acc.openPositions.length) {
+        const entryPrice = acc.openPositions[0].price;
+        const profitDistancePct = 1.25;
+        const profitTargetSignal = profitTarget(
+          entryPrice,
+          candle.c,
+          profitDistancePct
+        );
+        if (profitTargetSignal) {
+          signal = profitTargetSignal;
+        }
+      }
+
       return executeTrade({
         ...acc,
         signal,
