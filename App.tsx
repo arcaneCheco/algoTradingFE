@@ -1,50 +1,63 @@
 import { useEffect, useState } from "react";
-import styled from "styled-components"
-import { subDays, subHours, subMinutes, subWeeks, subMonths } from "date-fns";
-import { PricingComponent, CandlestickGranularity } from "./types/types";
+import styled from "styled-components";
 import {
-  XAxis,
-  YAxis,
-  Tooltip,
-  Bar,
-  ComposedChart,
-  Legend,
-  Line,
-} from "recharts";
+  subDays,
+  subHours,
+  subMinutes,
+  subWeeks,
+  subMonths,
+  formatRFC3339,
+  format,
+} from "date-fns";
+import {
+  PricingComponent,
+  CandlestickGranularity,
+  CandleWithSMA,
+  Trade,
+  Signal,
+  PerformanceSummary,
+} from "./types/types";
+import { set1 } from "./testdata";
+import { sma } from "./sma";
+import { backtest } from "./backtest";
+import { myStrategy } from "./myStrategy";
+import { CandlePlot } from "./CandleStickPlot";
+import { getPerformanceSummary } from "./getPerformanceSummary";
+import { PerformanceSummaryTable } from "./PerformanceSummaryTable";
 
-type CandlesQueryParams = {
-  count?: number;
-  price?: PricingComponent;
-  from?: string;
-  to?: string;
-  granularity?: CandlestickGranularity;
-  dailyAlignment?: number;
-  alignmentTimezone?: string;
-}
+// type CandlesQueryParams = {
+//   count?: number;
+//   price?: PricingComponent;
+//   from?: string;
+//   to?: string;
+//   granularity?: CandlestickGranularity;
+//   dailyAlignment?: number;
+//   alignmentTimezone?: string;
+// }
 
-const assembleQueryString = (queryParams: {[key:string]: string | number | undefined}) => {
-  let isFirst = true;
-  return Object.entries(queryParams).reduce((acc, [key, value]) => {
-    let delimiter = ''
-    if (isFirst) {
-        isFirst=false;
-      } else {
-      delimiter = '&';
-    }
-    return acc + delimiter + `${key}=${value}`
-  }, '?')
-}
+// const assembleQueryString = (queryParams: {[key:string]: string | number | undefined}) => {
+//   let isFirst = true;
+//   return Object.entries(queryParams).reduce((acc, [key, value]) => {
+//     let delimiter = ''
+//     if (isFirst) {
+//         isFirst=false;
+//       } else {
+//       delimiter = '&';
+//     }
+//     return acc + delimiter + `${key}=${value}`
+//   }, '?')
+// }
 
-const baseLink = 'http://localhost:3000';
+// const baseLink = 'http://localhost:3000';
 
-const getCandles =  async (instrument: string, queryParams: CandlesQueryParams) => {
-  const query = assembleQueryString(queryParams);
-  const data = await fetch(
-    `${baseLink}/instruments/${instrument}/candles${query}`
-  );
-  const res = await data.json();
-  return res;
-};
+// const getCandles =  async (instrument: string, queryParams: CandlesQueryParams) => {
+//   const query = assembleQueryString(queryParams);
+//   const data = await fetch(
+//     `${baseLink}/instruments/${instrument}/candles${query}`
+//   );
+//   const res = await data.json();
+//   return res;
+// };
 
 // getCandles('EUR_USD', {count: 100, price: 'M', from: '2017-01-01T00:00:00Z', granularity: 'M5' })
 
@@ -92,53 +105,51 @@ const getCandles =  async (instrument: string, queryParams: CandlesQueryParams) 
 // };
 
 export const App = () => {
-  const [assets, setAssets] = useState([]);
+  // useEffect(() => {
+  //   const t = async () => {
+  //     const t = await getCandles('EUR_USD', {
+  //       count: 100,
+  //       price: PricingComponent.M,
+  //       from: '2017-01-01T00:00:00Z',
+  //       granularity: CandlestickGranularity.D,
+  //       dailyAlignment: 17,
+  //       alignmentTimezone: 'America/New_York'
+  //      });
+  //     console.log(t);
+  //   };
+  //   t()
+  // }, [])
 
+  const [candles, setCandles] = useState<Array<CandleWithSMA>>([]);
+  const [trades, setTrades] = useState<Array<Trade>>([]);
+  const [performanceSummaryData, setPerformanceSummaryData] =
+    useState<PerformanceSummary>({} as PerformanceSummary);
   useEffect(() => {
-    const t = async () => {
-      const t = await getCandles('EUR_USD', {
-        count: 100, 
-        price: PricingComponent.M, 
-        from: '2017-01-01T00:00:00Z', 
-        granularity: CandlestickGranularity.D,
-        dailyAlignment: 17,
-        alignmentTimezone: 'America/New_York'
-       });
-      console.log(t);
-    };
-    t()
-    // const data = t();
-    // console.log({data})
-  }, [])
+    let data = sma(set1.slice(2459), 30);
+    setCandles(data);
+    console.log(data);
 
-  const [filters, setFilters] = useState({
-    status: "",
-    asset_class: "us_equity",
-    exchange: "",
-  });
+    const res = backtest(myStrategy, data);
+    setTrades(res.trades);
+    console.log(res.trades);
 
-  const [loading, setLoading] = useState(false);
+    const performance = getPerformanceSummary(1000, res.trades);
+    setPerformanceSummaryData(performance);
+  }, []);
 
-  const [plotData, setPlotData] = useState([]);
-  const [loadingPlotData, setLoadingPlotData] = useState(false);
-
-  const [plotDataArgs, setPlotDataArgs] = useState({
-    symbol: "GOOG",
-    start: "2023-01-10",
-    end: "2024-01-10",
-    timeframe: 1,
-    timeframeUnit: "DAY",
-  });
-
-  return <Wrapper></Wrapper>;
+  return (
+    <Wrapper>
+      <CandlePlot candles={candles} trades={trades} />
+      <PerformanceSummaryTable performanceData={performanceSummaryData} />
+    </Wrapper>
+  );
 };
 
 const Wrapper = styled.div`
   border: 1px solid black;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px;
+  padding: 30px 15px;
 `;

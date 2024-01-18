@@ -54,21 +54,52 @@ export interface OpenPosition {
   time: string;
   signal: Signal;
   price: number;
-  amount: number;
 }
 
 export type Nullable<T> = T | null;
 
+// export interface Trade {
+//   entryTime: string;
+//   entryPrice: number;
+//   entrySignal: Signal;
+//   positionSize: number;
+//   exitTime: Nullable<string>;
+//   exitPrice: Nullable<number>;
+//   exitSignal: Nullable<Signal>;
+//   profitLoss: Nullable<number>;
+//   profitPct: Nullable<number>;
+//   // riskPct: Nullable<number>;
+//   holdingPeriod: Nullable<string>;
+//   growth: Nullable<number>;
+// }
 export interface Trade {
   entryTime: string;
   entryPrice: number;
   entrySignal: Signal;
-  positionSize: number;
-  exitTime: Nullable<string>;
-  exitPrice: Nullable<number>;
-  exitSignal: Nullable<Signal>;
-  profitLoss: Nullable<number>;
-  profitPct: Nullable<number>;
-  // riskPct: Nullable<number>;
-  holdingPeriod: Nullable<string>;
+  exitTime: string;
+  exitPrice: number;
+  exitSignal: Signal;
+  profitLoss: number;
+  profitPct: string;
+  // riskPct: number;
+  holdingPeriod: string;
+  growth: number;
+}
+
+export interface PerformanceSummary {
+  startingCapital: number;
+  finalCapital: number;
+  profit: number;
+  profitPct: string;
+  growth: number;
+  totalTrades: number;
+  numWinningTrades: number;
+  numLosingTrades: number;
+  winRate: string;
+  loseRate: string;
+  averageWinningTrade: number;
+  averageLosingTrade: number;
+  averageProfitPerTrade: number;
+  barCount: number;
+  profitFactor: number | string;
 }
