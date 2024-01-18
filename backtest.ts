@@ -21,28 +21,30 @@ const finalizePosition = (
   exitTime: string,
   exitPrice: number
 ) => {
-  const { time, price, signal, amount } = openPosition;
+  const { time, price, signal } = openPosition;
 
   const profitLoss =
     signal === Signal.BUY
-      ? (exitPrice - price) * amount
-      : (price - exitPrice) * amount;
+      ? parseFloat((exitPrice - price).toFixed(5))
+      : parseFloat((price - exitPrice).toFixed(5));
 
-  const profitPct = (profitLoss / amount / price) * 100;
+  const profitPct = ((profitLoss / price) * 100).toFixed(3) + "%";
 
   const holdingPeriod = formatDistance(time, exitTime);
+
+  const growth = signal === Signal.BUY ? exitPrice / price : price / exitPrice;
 
   const trade: Trade = {
     entryTime: time,
     entryPrice: price,
     entrySignal: signal,
-    positionSize: amount,
     exitTime,
     exitPrice,
     exitSignal: exitSignal,
     profitLoss,
     profitPct,
     holdingPeriod,
+    growth,
   };
 
   return trade;
@@ -69,8 +71,6 @@ const executeTrade = ({
     time,
     signal,
     price,
-    amount:
-      signal === Signal.BUY ? 100 : signal === Signal.SELLSHORT ? -100 : 0, // Adjust position size as needed
   };
 
   let newPositions = [];
