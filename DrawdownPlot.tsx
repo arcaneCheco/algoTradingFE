@@ -35,6 +35,9 @@ export const DrawdownPlot = ({ data }: { data: Array<number> }) => {
             title: {
               text: "trades",
             },
+            labels: {
+              formatter: (val) => String(Number(val) - 1),
+            },
           },
           yaxis: {
             labels: {
