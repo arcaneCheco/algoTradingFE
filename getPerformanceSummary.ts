@@ -11,8 +11,11 @@ export const getPerformanceSummary = (
   let barCount = 0;
   let totalProfits = 0;
   let totalLosses = 0;
+  let totalSpreadCosts = 0;
 
-  trades.forEach(({ growth, profitLoss }) => {
+  trades.forEach(({ growth, profitLoss, spreadCosts, entryPrice }) => {
+    totalSpreadCosts += (workingCapital / entryPrice) * spreadCosts;
+
     workingCapital *= growth;
 
     if (profitLoss > 0) {
@@ -59,5 +62,7 @@ export const getPerformanceSummary = (
         ? parseFloat((totalProfits / Math.abs(totalLosses)).toFixed(5))
         : "no losing trades",
     barCount,
+    totalSpreadCosts,
+    avgSpreadCostPerTrade: totalSpreadCosts / totalTrades,
   };
 };

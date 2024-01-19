@@ -17,7 +17,7 @@ import {
   Signal,
   PerformanceSummary,
 } from "./types/types";
-import { set1 } from "./testdata";
+import { set1, set2 } from "./testdata";
 import { sma } from "./sma";
 import { backtest } from "./backtest";
 import { myStrategy } from "./myStrategy";
@@ -31,6 +31,9 @@ import { EquityPlot } from "./EquityPlot";
 import { computeEquity } from "./computeEquity";
 
 // TO-DO: STOP-LOSS, PROFIT-TARGET, SPREAD-COST,
+// TO-DO: AREA-GRAPHS, STAART AT 0, not 1
+
+// pro-tip: lower spreads when entering trade trade 10 minutes before close or 90 minutes after new open
 
 // type CandlesQueryParams = {
 //   count?: number;
@@ -134,8 +137,10 @@ export const App = () => {
   const [drawdownData, setDrawdownData] = useState<Array<number>>([]);
   const [equityData, setEquityData] = useState<Array<number>>([]);
   useEffect(() => {
-    let data = sma(set1.slice(2289), 50);
+    // let data = sma(set1.slice(1000), 50);
+    // let data = sma(set1.slice(2289), 50);
     // let data = sma(set1.slice(2459), 30);
+    let data = sma(set2.slice(2459), 30);
     setCandles(data);
     console.log(data);
 

@@ -1,4 +1,4 @@
-import { Signal } from "./types/types";
+import { Signal } from "types/types";
 
 export const stopLoss = (
   entryPrice: number,

@@ -1,10 +1,15 @@
-import { Candle, CandleWithSMA } from "./types/types";
+import {
+  Candle,
+  CandleWithSMA,
+  CandleWithSpread,
+  CandleWithSpreadAndSMA,
+} from "./types/types";
 
 export const sma = (
-  candles: Array<Candle>,
+  candles: Array<CandleWithSpread>,
   period: number,
   places = 5
-): Array<CandleWithSMA> => {
+) => {
   return candles
     .map((candle, index, array) => {
       if (index < period - 1) {
@@ -16,5 +21,5 @@ export const sma = (
       );
       return { ...candle, sma };
     })
-    .slice(period - 1) as Array<CandleWithSMA>;
+    .slice(period - 1) as Array<CandleWithSpreadAndSMA>;
 };

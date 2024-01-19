@@ -42,18 +42,30 @@ export interface Candle {
   h: number;
   l: number;
   time: string;
-  sma?: number;
 }
 export interface CandleWithSMA extends Candle {
   sma: number;
 }
+export interface CandleWithSpread extends Candle {
+  bid: number;
+  ask: number;
+}
+
+export interface CandleWithSpreadAndSMA
+  extends CandleWithSpread,
+    CandleWithSMA {}
 
 export type Strategy = (candle: CandleWithSMA) => Signal;
 
 export interface OpenPosition {
+  // time: string;
+  // signal: Signal;
+  // price: number;
   time: string;
-  signal: Signal;
   price: number;
+  signal: Signal;
+  askPrice: number;
+  bidPrice: number;
 }
 
 export type Nullable<T> = T | null;
@@ -84,6 +96,7 @@ export interface Trade {
   // riskPct: number;
   holdingPeriod: string;
   growth: number;
+  spreadCosts: number;
 }
 
 export interface PerformanceSummary {
@@ -102,4 +115,6 @@ export interface PerformanceSummary {
   averageProfitPerTrade: number;
   barCount: number;
   profitFactor: number | string;
+  totalSpreadCosts: number;
+  avgSpreadCostPerTrade: number;
 }
