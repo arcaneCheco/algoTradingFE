@@ -1,4 +1,4 @@
-import { PerformanceSummary, Trade } from "./types/types";
+import { PerformanceSummary, Trade } from "@src/types/types";
 
 export const getPerformanceSummary = (
   startingCapital: number,

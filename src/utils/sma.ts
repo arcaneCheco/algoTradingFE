@@ -3,7 +3,7 @@ import {
   CandleWithSMA,
   CandleWithSpread,
   CandleWithSpreadAndSMA,
-} from "./types/types";
+} from "@src/types/types";
 
 export const sma = (
   candles: Array<CandleWithSpread>,

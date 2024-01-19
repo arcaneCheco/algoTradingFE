@@ -3,7 +3,7 @@ import {
   OpenPosition,
   Signal,
   Trade,
-} from "types/types";
+} from "@src/types/types";
 import { finalizePosition } from "./finalizePosition";
 
 const closePositionsUtil = ({

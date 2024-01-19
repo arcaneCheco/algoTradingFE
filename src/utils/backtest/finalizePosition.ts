@@ -1,5 +1,5 @@
 import { formatDistance } from "date-fns";
-import { OpenPosition, Signal, Trade } from "types/types";
+import { OpenPosition, Signal, Trade } from "@src/types/types";
 
 export const finalizePosition = (
   entryPosition: OpenPosition,

@@ -1,4 +1,6 @@
-import { Trade } from "./types/types";
+import { Trade } from "@src/types/types";
+
+// TO-DO: INCLUDE OPEN POSITIONS
 
 export const computeDrawdown = (
   startingCapital: number,

@@ -1,4 +1,4 @@
-import { Trade } from "./types/types";
+import { Trade } from "@src/types/types";
 
 export const computeEquity = (
   startingCapital: number,

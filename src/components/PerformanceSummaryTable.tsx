@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { PerformanceSummary } from "./types/types";
+import { PerformanceSummary } from "@src/types/types";
 
 export const PerformanceSummaryTable = ({
   performanceData,

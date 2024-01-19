@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES6",
     "module": "commonjs",
-    "baseUrl": ".",
+    "baseUrl": "src",
     "strict": true,
     "allowJs": false,
     "noImplicitAny": true,
@@ -15,8 +15,7 @@
     "jsx": "react-jsx",
     "moduleResolution": "node",
     "paths": {
-      "@src/*": ["./client/src/*"],
-      "@types/*": ["types/*"]
+      "@src/*": ["./*"]
     }
   }
 }

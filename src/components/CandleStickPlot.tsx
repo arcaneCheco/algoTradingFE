@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { CandleWithSMA, Trade } from "./types/types";
+import { CandleWithSMA, Trade } from "@src/types/types";
 import Chart from "react-apexcharts";
 
 export const CandlePlot = ({

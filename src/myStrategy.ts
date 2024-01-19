@@ -1,4 +1,4 @@
-import { Signal, Strategy } from "./types/types";
+import { Signal, Strategy } from "types/types";
 
 // https://www.youtube.com/watch?v=jAI6s1WuEus&ab_channel=TheTransparentTrader
 

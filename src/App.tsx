@@ -16,19 +16,22 @@ import {
   Trade,
   Signal,
   PerformanceSummary,
-} from "./types/types";
-import { set1, set2 } from "./testdata";
-import { sma } from "./sma";
-import { backtest } from "./backtest";
+} from "@src/types/types";
+import { set1, set2 } from "@src/testdata";
+import {
+  sma,
+  backtest,
+  computeDrawdown,
+  computeEquity,
+  getPerformanceSummary,
+} from "@src/utils";
 import { myStrategy } from "./myStrategy";
-import { CandlePlot } from "./CandleStickPlot";
-import { getPerformanceSummary } from "./getPerformanceSummary";
-import { PerformanceSummaryTable } from "./PerformanceSummaryTable";
-import { computeDrawdown } from "./computeDrawdown";
-import Chart from "react-apexcharts";
-import { DrawdownPlot } from "./DrawdownPlot";
-import { EquityPlot } from "./EquityPlot";
-import { computeEquity } from "./computeEquity";
+import {
+  CandlePlot,
+  PerformanceSummaryTable,
+  DrawdownPlot,
+  EquityPlot,
+} from "@src/components";
 
 // TO-DO: STOP-LOSS, PROFIT-TARGET, SPREAD-COST,
 // TO-DO: AREA-GRAPHS, STAART AT 0, not 1

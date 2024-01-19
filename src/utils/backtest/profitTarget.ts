@@ -1,4 +1,4 @@
-import { Signal } from "types/types";
+import { Signal } from "@src/types/types";
 
 export const profitTarget = (
   entryPrice: number,
