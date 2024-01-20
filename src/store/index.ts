@@ -29,6 +29,10 @@ interface MyStore {
   setGranularity: (granularity: CandlestickGranularity) => void;
   candleData: Array<Candle>;
   setCandleData: (data: Array<Candle>) => void;
+  smaPeriod: number;
+  setSMAPeriod: (smaPeriod: number) => void;
+  smaData: Array<number | null>;
+  setSMAData: (smaData: Array<number | null>) => void;
 }
 
 const useMyStoreBaase = create<MyStore>((set) => ({
@@ -42,6 +46,10 @@ const useMyStoreBaase = create<MyStore>((set) => ({
   setGranularity: (granularity) => set(() => ({ granularity })),
   candleData: [],
   setCandleData: (candleData) => set(() => ({ candleData })),
+  smaPeriod: 50,
+  setSMAPeriod: (smaPeriod) => set(() => ({ smaPeriod })),
+  smaData: [],
+  setSMAData: (smaData) => set(() => ({ smaData })),
 }));
 
 const useMyStore = createSelectors(useMyStoreBaase);

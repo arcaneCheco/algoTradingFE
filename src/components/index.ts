@@ -3,3 +3,4 @@ export * from "./CandlestickPlotForm";
 export * from "./DrawdownPlot";
 export * from "./EquityPlot";
 export * from "./PerformanceSummaryTable";
+export * from "./Indicators";

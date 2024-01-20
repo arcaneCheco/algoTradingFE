@@ -4,3 +4,4 @@ export * from "./computeEquity";
 export * from "./sma";
 export * from "./getPerformanceSummary";
 export * from "./api";
+export * from "./formatDate";
