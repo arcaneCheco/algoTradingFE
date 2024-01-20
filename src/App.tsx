@@ -32,6 +32,7 @@ import {
   DrawdownPlot,
   EquityPlot,
   CandlestickPlotForm,
+  Indicators,
 } from "@src/components";
 import { useMyStore } from "./store";
 import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
@@ -51,21 +52,6 @@ import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
 // }
 
 export const App = () => {
-  // useEffect(() => {
-  //   const t = async () => {
-  //     const t = await getCandles({
-  //       instrument: "EUR_USD",
-  //       params: {
-  //         from: "2020-01-01T22:00:00Z",
-  //         to: "2024-01-01T22:00:00Z",
-  //         granularity: "D",
-  //       },
-  //     });
-  //     console.log(t);
-  //   };
-  //   t();
-  // }, []);
-
   // const [candles, setCandles] = useState<Array<CandleWithSMA>>([]);
   const [trades, setTrades] = useState<Array<Trade>>([]);
   const [performanceSummaryData, setPerformanceSummaryData] =
@@ -96,6 +82,7 @@ export const App = () => {
     <Wrapper>
       <CandlestickPlotForm />
       <CandlePlot trades={[]} />
+      <Indicators />
       {/* <PerformanceSummaryTable performanceData={performanceSummaryData} />
       <EquityPlot data={equityData} />
       <DrawdownPlot data={drawdownData} /> */}
