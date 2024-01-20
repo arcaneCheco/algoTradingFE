@@ -16,7 +16,7 @@ export const getPerformanceSummary = (
   trades.forEach(({ growth, profitLoss, spreadCosts, entryPrice }) => {
     totalSpreadCosts += (workingCapital / entryPrice) * spreadCosts;
 
-    workingCapital *= growth;
+    workingCapital *= growth; // assuming entre capital is invested
 
     if (profitLoss > 0) {
       totalProfits += profitLoss;
