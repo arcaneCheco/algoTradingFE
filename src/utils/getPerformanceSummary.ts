@@ -4,6 +4,7 @@ export const getPerformanceSummary = (
   startingCapital: number,
   trades: Array<Trade>
 ): PerformanceSummary => {
+  console.log("CALCULATING PERFROMANCE");
   let workingCapital = startingCapital;
   const totalTrades = trades.length;
   let numWinningTrades = 0;
@@ -14,7 +15,7 @@ export const getPerformanceSummary = (
   let totalSpreadCosts = 0;
 
   trades.forEach(({ growth, profitLoss, spreadCosts, entryPrice }) => {
-    totalSpreadCosts += (workingCapital / entryPrice) * spreadCosts;
+    totalSpreadCosts += (workingCapital / entryPrice) * (spreadCosts || 0);
 
     workingCapital *= growth; // assuming entre capital is invested
 

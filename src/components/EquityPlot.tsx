@@ -1,8 +1,12 @@
+import { useMyStore } from "@src/store";
+import { computeEquity } from "@src/utils";
 import Chart from "react-apexcharts";
 import styled from "styled-components";
 
-export const EquityPlot = ({ data }: { data: Array<number> }) => {
-  if (!data.length) return null;
+export const EquityPlot = () => {
+  const trades = useMyStore.use.trades();
+  const startingCapital = useMyStore.use.startingCapital();
+  const equity = computeEquity(startingCapital, trades);
   return (
     <ChartWrapper>
       <Chart
@@ -10,7 +14,7 @@ export const EquityPlot = ({ data }: { data: Array<number> }) => {
         series={[
           {
             name: "equity",
-            data,
+            data: equity,
           },
         ]}
         type="area"

@@ -4,10 +4,11 @@ import Chart from "react-apexcharts";
 import { useMyStore } from "@src/store";
 import { formatDate } from "@src/utils";
 
-export const CandlePlot = ({ trades }: { trades: Array<Trade> }) => {
+export const CandlePlot = () => {
   const candleData = useMyStore.use.candleData();
   const setCandleData = useMyStore.use.setCandleData();
   const smaData = useMyStore.use.smaData();
+  const trades = useMyStore.use.trades();
 
   const xAxis = candleData.map(({ time }) => new Date(time).getTime());
   const series = [

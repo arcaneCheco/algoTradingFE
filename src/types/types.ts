@@ -31,7 +31,7 @@ export interface CandleWithSpreadAndSMA
   extends CandleWithSpread,
     CandleWithSMA {}
 
-export type Strategy = (candle: CandleWithSMA) => Signal;
+export type Strategy = (candle: Candle) => Signal;
 
 export interface OpenPosition {
   // time: string;
@@ -72,7 +72,7 @@ export interface Trade {
   // riskPct: number;
   holdingPeriod: string;
   growth: number;
-  spreadCosts: number;
+  spreadCosts?: number;
 }
 
 export interface PerformanceSummary {

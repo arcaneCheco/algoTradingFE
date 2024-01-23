@@ -1,19 +1,23 @@
 import {
+  Candle,
   CandleWithSpreadAndSMA,
   OpenPosition,
   Signal,
   Trade,
 } from "@src/types/types";
 import { finalizePosition } from "./finalizePosition";
+import { BacktestData } from "./backtest";
 
 const closePositionsUtil = ({
   openPositions,
   exitPosition,
   closeLongPositions,
+  includeSpreads,
 }: {
   openPositions: Array<OpenPosition>;
   exitPosition: OpenPosition;
   closeLongPositions: boolean;
+  includeSpreads: boolean;
 }) => {
   const finalizedTrades: Array<Trade> = [];
   const openPositionsLeft = openPositions.filter((openPosition) => {
@@ -21,7 +25,11 @@ const closePositionsUtil = ({
       openPosition.signal ===
       (closeLongPositions ? Signal.BUY : Signal.SELLSHORT)
     ) {
-      const trade = finalizePosition(openPosition, exitPosition);
+      const trade = finalizePosition(
+        openPosition,
+        exitPosition,
+        includeSpreads
+      );
       finalizedTrades.push(trade);
       return false;
     }
@@ -35,11 +43,13 @@ export const executeTrade = ({
   trades,
   openPositions,
   candle,
+  includeSpreads,
 }: {
   signal: Signal;
   trades: Array<Trade>;
   openPositions: Array<OpenPosition>;
-  candle: CandleWithSpreadAndSMA;
+  candle: BacktestData;
+  includeSpreads: boolean;
 }): {
   trades: Array<Trade>;
   openPositions: Array<OpenPosition>;
@@ -62,17 +72,10 @@ export const executeTrade = ({
       openPositions,
       exitPosition: newPosition,
       closeLongPositions: false,
+      includeSpreads,
     });
     newPositions = [...openPositionsLeft];
     newTrades = [...newTrades, ...finalizedTrades];
-    // newPositions = openPositions.filter((openPosition) => {
-    //   if (openPosition.signal === Signal.SELLSHORT) {
-    //     const trade = finalizePosition(openPosition, newPosition, includeSpreads);
-    //     newTrades.push(trade);
-    //     return false;
-    //   }
-    //   return true;
-    // });
     // open new long position
     // for now: only open position if there are no open positions already
     if (!newPositions.length) {
@@ -87,6 +90,7 @@ export const executeTrade = ({
       openPositions,
       exitPosition: newPosition,
       closeLongPositions: true,
+      includeSpreads,
     });
     newPositions = [...openPositionsLeft];
     newTrades = [...newTrades, ...finalizedTrades];
@@ -105,6 +109,7 @@ export const executeTrade = ({
       openPositions,
       exitPosition: newPosition,
       closeLongPositions: false,
+      includeSpreads,
     });
     newPositions = [...openPositionsLeft];
     newTrades = [...newTrades, ...finalizedTrades];
@@ -117,6 +122,7 @@ export const executeTrade = ({
       openPositions,
       exitPosition: newPosition,
       closeLongPositions: true,
+      includeSpreads,
     });
     newPositions = [...openPositionsLeft];
     newTrades = [...newTrades, ...finalizedTrades];

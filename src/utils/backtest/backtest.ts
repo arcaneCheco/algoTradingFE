@@ -13,25 +13,25 @@ import {
 import { formatRFC3339, formatDistance } from "date-fns";
 import { finalizePosition } from "./finalizePosition";
 import { executeTrade } from "./executeTrade";
+import { useMyStore } from "@src/store";
 
 // TO-DO: STOP-LOSS and PROFIT-TARGET as DOLLAR-AMOUNT instead of PERCENTAGE
 
+export interface BacktestData extends Candle {
+  sma: number;
+  bid: number;
+  ask: number;
+}
+
 export const backtest = (
   strategy: Strategy,
-  data: Array<CandleWithSpreadAndSMA>,
-  // data: Array<CandleWithSMA>,
+  data: Array<BacktestData>,
   options: {
     isStopLoss: boolean;
     stopDistancePct: number;
     isProfitTarget: boolean;
     profitDistancePct: number;
     includeSpreads: boolean;
-  } = {
-    isStopLoss: true,
-    stopDistancePct: 3,
-    isProfitTarget: true,
-    profitDistancePct: 1.25,
-    includeSpreads: true,
   }
 ) => {
   const results = data.reduce(
@@ -76,10 +76,7 @@ export const backtest = (
         ...acc,
         signal,
         candle,
-        // price: candle.c,
-        // time: candle.time,
-        // ask: candle.ask,
-        // bid: candle.bid,
+        includeSpreads: options.includeSpreads,
       });
     },
     { trades: [], openPositions: [] }

@@ -1,22 +1,8 @@
-import { create, StoreApi, UseBoundStore } from "zustand";
+import { create, StateCreator, StoreApi } from "zustand";
 import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
-import { Candle } from "@src/types/types";
-
-type WithSelectors<S> = S extends { getState: () => infer T }
-  ? S & { use: { [K in keyof T]: () => T[K] } }
-  : never;
-
-const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(
-  _store: S
-) => {
-  let store = _store as WithSelectors<typeof _store>;
-  store.use = {};
-  for (let k of Object.keys(store.getState())) {
-    (store.use as any)[k] = () => store((s) => s[k as keyof typeof s]);
-  }
-
-  return store;
-};
+import { Candle, Trade } from "@src/types/types";
+import { createSelectors } from "./createSelectors";
+import { BacktestSetup, useBacktestSetupBase } from "./backtestSetup";
 
 interface MyStore {
   assetName: string;
@@ -33,9 +19,15 @@ interface MyStore {
   setSMAPeriod: (smaPeriod: number) => void;
   smaData: Array<number | null>;
   setSMAData: (smaData: Array<number | null>) => void;
+  spreadsData: Array<{ bid: number; ask: number }>;
+  setSpreadsData: (spreadsData: Array<{ bid: number; ask: number }>) => void;
+  trades: Array<Trade>;
+  setTrades: (spreadsData: Array<Trade>) => void;
+  startingCapital: number;
+  setStartingCapital: (startingCapital: number) => void;
 }
 
-const useMyStoreBaase = create<MyStore>((set) => ({
+const useMyStoreBaase: StateCreator<MyStore> = (set) => ({
   assetName: "EUR_GBP",
   updateAssetName: (assetName) => set(() => ({ assetName })),
   startTime: "2023-08-01T22:00",
@@ -50,9 +42,20 @@ const useMyStoreBaase = create<MyStore>((set) => ({
   setSMAPeriod: (smaPeriod) => set(() => ({ smaPeriod })),
   smaData: [],
   setSMAData: (smaData) => set(() => ({ smaData })),
+  spreadsData: [],
+  setSpreadsData: (spreadsData) => set(() => ({ spreadsData })),
+  trades: [],
+  setTrades: (trades) => set(() => ({ trades })),
+  startingCapital: 10000,
+  setStartingCapital: (startingCapital) => set(() => ({ startingCapital })),
+});
+
+const UseBoundStore = create<BacktestSetup & MyStore>()((...a) => ({
+  ...useMyStoreBaase(...a),
+  ...useBacktestSetupBase(...a),
 }));
 
-const useMyStore = createSelectors(useMyStoreBaase);
+const useMyStore = createSelectors(UseBoundStore);
 
 export { useMyStore };
 

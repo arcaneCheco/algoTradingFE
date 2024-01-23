@@ -3,7 +3,8 @@ import { OpenPosition, Signal, Trade } from "@src/types/types";
 
 export const finalizePosition = (
   entryPosition: OpenPosition,
-  exitPosition: OpenPosition
+  exitPosition: OpenPosition,
+  includeSpreads: boolean
 ) => {
   const {
     time: entryTime,
@@ -19,16 +20,6 @@ export const finalizePosition = (
     askPrice: exitAskPrice,
     bidPrice: exitBidPrice,
   } = exitPosition;
-
-  // let exitPriceReal = exitPrice;
-  // if (includeSpreads) {
-  //   if (exitSignal === Signal.BUY || exitSignal === Signal.BUYTOCOVER) {
-  //     exitPriceReal = askPrice;
-  //   }
-  //   if (exitSignal === Signal.SELL || exitSignal === Signal.SELLSHORT) {
-  //     exitPriceReal = bidPrice;
-  //   }
-  // }
 
   const profitLoss =
     entrySignal === Signal.BUY
@@ -49,21 +40,18 @@ export const finalizePosition = (
   // buy: 1.08810, sell: 1.08800, => BUY 50units, spread: -0.002
   // buy: 1.08804, sell: 1.08794, => CLOSE, profit: -0.01, spread: -0.002
 
-  // let spreadCostOnEntry, spreadCostOnExit, totalSpreadCost;
-
   let spreadCosts = 0;
 
-  if (entrySignal === Signal.BUY) {
-    spreadCosts += entryAskPrice - entryPrice;
-    spreadCosts += exitPrice - exitBidPrice;
+  if (includeSpreads) {
+    if (entrySignal === Signal.BUY) {
+      spreadCosts += entryAskPrice - entryPrice;
+      spreadCosts += exitPrice - exitBidPrice;
+    }
+    if (entrySignal === Signal.SELLSHORT) {
+      spreadCosts += entryPrice - entryBidPrice;
+      spreadCosts += exitAskPrice - exitPrice;
+    }
   }
-  if (entrySignal === Signal.SELLSHORT) {
-    spreadCosts += entryPrice - entryBidPrice;
-    spreadCosts += exitAskPrice - exitPrice;
-  }
-
-  // const spreadCostOnEntry = entrySignal === Signal.BUY ? entryAskPrice - entryPrice  : entryPrice - entryBidPrice;
-  // const spreadCostOnExit = ex === Signal.BUY ? entryAskPrice - entryPrice  : entryPrice - entryBidPrice;
 
   const trade: Trade = {
     entryTime,
@@ -76,7 +64,7 @@ export const finalizePosition = (
     profitPct,
     holdingPeriod,
     growth,
-    spreadCosts,
+    spreadCosts: includeSpreads ? spreadCosts : undefined,
   };
 
   return trade;

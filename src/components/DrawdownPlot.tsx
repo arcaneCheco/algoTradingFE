@@ -1,8 +1,12 @@
+import { useMyStore } from "@src/store";
+import { computeDrawdown } from "@src/utils";
 import Chart from "react-apexcharts";
 import styled from "styled-components";
 
-export const DrawdownPlot = ({ data }: { data: Array<number> }) => {
-  if (!data.length) return null;
+export const DrawdownPlot = () => {
+  const trades = useMyStore.use.trades();
+  const startingCapital = useMyStore.use.startingCapital();
+  const drawdown = computeDrawdown(startingCapital, trades);
   return (
     <ChartWrapper>
       <Chart
@@ -10,7 +14,7 @@ export const DrawdownPlot = ({ data }: { data: Array<number> }) => {
         series={[
           {
             name: "drawdown",
-            data,
+            data: drawdown,
           },
         ]}
         type="area"

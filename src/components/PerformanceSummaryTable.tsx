@@ -1,11 +1,12 @@
 import styled from "styled-components";
 import { PerformanceSummary } from "@src/types/types";
+import { getPerformanceSummary } from "@src/utils";
+import { useMyStore } from "@src/store";
 
-export const PerformanceSummaryTable = ({
-  performanceData,
-}: {
-  performanceData: PerformanceSummary;
-}) => {
+export const PerformanceSummaryTable = () => {
+  const trades = useMyStore.use.trades();
+  const startingCapital = useMyStore.use.startingCapital();
+  const performanceData = getPerformanceSummary(startingCapital, trades);
   return (
     <Wrapper>
       <Table>
