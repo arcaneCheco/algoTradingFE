@@ -18,3 +18,11 @@ body {
 #container {
     height: 100%;
 }
+
+.hello {
+    opacity: 0;
+}
+
+.apexcharts-series-markers {
+    pointer-events: all;
+}

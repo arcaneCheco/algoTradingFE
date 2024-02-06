@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { getCandles } from "@src/utils";
+import { getCandles } from "@src/api";
 import { useMyStore } from "@src/store";
 import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
 
@@ -16,19 +16,18 @@ export const CandlestickPlotForm = () => {
 
   return (
     <Wrapper
-      onSubmit={async (event) => {
-        event.preventDefault();
-        console.log("hello");
-        const candles = await getCandles({
-          instrument: assetName,
-          params: {
-            from: startTime,
-            to: endTime,
-            granularity,
-          },
-        });
-        setCandleData(candles);
-      }}
+    // onSubmit={async (event) => {
+    //   event.preventDefault();
+    //   const candles = await getCandles({
+    //     instrument: assetName,
+    //     params: {
+    //       from: startTime,
+    //       to: endTime,
+    //       granularity,
+    //     },
+    //   });
+    //   setCandleData(candles);
+    // }}
     >
       <input
         placeholder="asset"

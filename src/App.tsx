@@ -18,22 +18,23 @@ import {
   CandlestickPlotForm,
   Indicators,
 } from "@src/components";
-import { useMyStore } from "./store";
-import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
-import { BacktestSetup } from "./components/BacktestSetup";
+// import { useMyStore } from "./store";
+// import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
+// import { BacktestSetup } from "./components/BacktestSetup";
+// import { getCandles } from "./api";
 
 // pro-tip: lower spreads when entering trade trade 10 minutes before close or 90 minutes after new open
 
 export const App = () => {
   return (
     <Wrapper>
-      <CandlestickPlotForm />
+      {/* <CandlestickPlotForm /> */}
       <CandlePlot />
-      <Indicators />
-      <BacktestSetup />
-      <PerformanceSummaryTable />
-      <EquityPlot />
-      <DrawdownPlot />
+      {/* <Indicators />
+      <BacktestSetup /> */}
+      {/* <PerformanceSummaryTable /> */}
+      {/* <EquityPlot />
+      <DrawdownPlot /> */}
     </Wrapper>
   );
 };

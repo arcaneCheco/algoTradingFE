@@ -2,6 +2,7 @@
   "dependencies": {
     "apexcharts": "^3.45.1",
     "date-fns": "^3.2.0",
+    "dotenv": "^16.4.1",
     "parcel": "^2.11.0",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
@@ -12,9 +13,16 @@
   },
   "devDependencies": {
     "@lt_surge/algo-trading-shared-types": "^1.0.13",
+    "@types/node": "^20.11.15",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "events": "^3.3.0",
+    "os-browserify": "^0.3.0",
+    "path-browserify": "^1.0.1",
     "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
     "tsconfig-paths": "^4.2.0"
   },
   "scripts": {
