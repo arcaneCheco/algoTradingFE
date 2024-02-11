@@ -8,11 +8,6 @@ import { useEffect, useRef, useState } from "react";
 import { ApexOptions } from "apexcharts";
 
 export const CandlePlot = () => {
-  // const candleData = useMyStore.use.candleData();
-  // const setCandleData = useMyStore.use.setCandleData();
-  // const smaData = useMyStore.use.smaData();
-  // const trades = useMyStore.use.trades();
-
   const [chartOptions, setChartOptions] = useState<ApexOptions>({
     chart: {
       id: "candles",
@@ -168,13 +163,6 @@ export const CandlePlot = () => {
         );
 
       setTradesData(segments);
-
-      // const trRes = (
-      //   await getTransactionsSinceID({
-      //     id: "",
-      //     params: { id: "142", type: "ORDER_FILL" },
-      //   })
-      // ).transactions.filter((tr: any) => tr.instrument === "EUR_GBP");
     };
     t();
   }, []);
@@ -260,7 +248,7 @@ export const CandlePlot = () => {
                   // find potential overlapping closing data
                   openTrade = myDats;
                   closeTrade = series.find(({ data }: any) => {
-                    if (data[1].x === time) {
+                    if (data[1]?.x === time) {
                       return true;
                     }
                     return false;

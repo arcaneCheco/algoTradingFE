@@ -30,6 +30,7 @@ export const getCandles = async ({ instrument, params }: ICandles) => {
       headers: defaultOptions.headers,
     });
     const data = await response.json();
+    // console.log({ data });
     // return data;
     const candles = data.candles.map(({ time, mid }: any) => ({
       o: Number(mid.o),

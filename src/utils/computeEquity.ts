@@ -12,3 +12,8 @@ export const computeEquity = (
   }
   return equityCurve;
 };
+
+// export const computeEquity2 = (trades)
+
+// create actions log
+// account id, time, action, reason etc..

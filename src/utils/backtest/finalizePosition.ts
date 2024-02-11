@@ -1,4 +1,3 @@
-import { formatDistance } from "date-fns";
 import { OpenPosition, Signal, Trade } from "@src/types/types";
 
 export const finalizePosition = (
@@ -28,7 +27,10 @@ export const finalizePosition = (
 
   const profitPct = ((profitLoss / entryPrice) * 100).toFixed(3) + "%";
 
-  const holdingPeriod = formatDistance(entryTime, exitTime);
+  const holdingPeriod =
+    (new Date(exitPrice).getTime() - new Date(entryTime).getTime()) /
+      (1000 * 60 * 60) +
+    "hours";
 
   const growth =
     entrySignal === Signal.BUY
