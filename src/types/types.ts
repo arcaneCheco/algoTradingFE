@@ -4,13 +4,15 @@ export enum PricingComponent {
   A = "A",
 }
 
-export enum Signal {
-  BUY = "BUY",
-  SELL = "SELL",
-  HOLD = "HOLD",
-  SELLSHORT = "SELLSHORT",
-  BUYTOCOVER = "BUYTOCOVER",
-}
+// export enum Signal {
+//   BUY = "BUY",
+//   SELL = "SELL",
+//   HOLD = "HOLD",
+//   SELLSHORT = "SELLSHORT",
+//   BUYTOCOVER = "BUYTOCOVER",
+// }
+
+export type Signal = "BUY" | "SELL" | "SELLSHORT" | "BUYTOCOVER" | "HOLD";
 
 export interface Candle {
   o: number;
@@ -19,30 +21,27 @@ export interface Candle {
   l: number;
   time: string;
 }
-export interface CandleWithSMA extends Candle {
-  sma: number;
-}
-export interface CandleWithSpread extends Candle {
-  bid: number;
-  ask: number;
-}
 
-export interface CandleWithSpreadAndSMA
-  extends CandleWithSpread,
-    CandleWithSMA {}
+// export type Strategy = (candle: Candle) => Signal;
+export type Strategy = ({
+  candle,
+  additionalData,
+  index,
+}: {
+  candle: Candle;
+  additionalData: any;
+  index: number;
+}) => Signal;
 
-export type Strategy = (candle: Candle) => Signal;
-
-export interface OpenPosition {
-  // time: string;
-  // signal: Signal;
-  // price: number;
+export interface OpenTrade {
   time: string;
   price: number;
   signal: Signal;
-  askPrice: number;
-  bidPrice: number;
+  holdingPeriod: number;
+  // direction: PositionStatus;
 }
+
+export type PositionStatus = "NONE" | "LONG" | "SHORT";
 
 export type Nullable<T> = T | null;
 
@@ -68,11 +67,13 @@ export interface Trade {
   exitPrice: number;
   exitSignal: Signal;
   profitLoss: number;
-  profitPct: string;
+  // profitPct: string;
   // riskPct: number;
-  holdingPeriod: string;
-  growth: number;
+  holdingPeriod: number;
+  // growth: number;
   spreadCosts?: number;
+  units: number;
+  // direction: PositionStatus;
 }
 
 export interface PerformanceSummary {

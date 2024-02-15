@@ -53,8 +53,8 @@ export const StrategyForm = ({
             <div>
               <input
                 type="checkbox"
-                checked={strategyName === "meanReversion_A"}
-                onClick={() => setStrategyName("meanReversion_A")}
+                checked={strategyName === "meanReversion_d"}
+                onClick={() => setStrategyName("meanReversion_d")}
                 readOnly
               />
               <label>meanReversion_A</label>
@@ -64,14 +64,14 @@ export const StrategyForm = ({
                 <label>SMA period</label>
                 <input
                   type="number"
-                  disabled={strategyName !== "meanReversion_A"}
+                  disabled={strategyName !== "meanReversion_e"}
                 />
               </div>
               <div>
                 <label>Entry Range</label>
                 <input
                   type="number"
-                  disabled={strategyName !== "meanReversion_A"}
+                  disabled={strategyName !== "meanReversion_e"}
                 />
               </div>
             </div>

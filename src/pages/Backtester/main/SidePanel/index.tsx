@@ -1,8 +1,11 @@
 import styled from "styled-components";
 import { DataForm } from "./DataForm";
 import { StrategyForm } from "./StrategyForm";
-import { getCandles } from "@src/api";
-import { sma } from "@src/utils";
+import { getCandles, getCandlesBigData } from "@src/api";
+import { backtest, sma } from "@src/utils";
+// import * as STRATEGIES from "@src/strategies";
+import { meanReversion_A, Description } from "@src/strategies/MeanReversion_A";
+import { CopyBlock } from "react-code-blocks";
 
 export const SidePanel = ({
   isSidePanel,
@@ -19,7 +22,9 @@ export const SidePanel = ({
   setIsSMA,
   smaPeriod,
   setSMAPeriod,
+  candleData,
   setCandles,
+  smaData,
   setSMAData,
   strategyType,
   setStrategyType,
@@ -33,9 +38,11 @@ export const SidePanel = ({
   setIsProfitTarget,
   profitTarget,
   setProfitTarget,
+  setTrades,
+  setTransactions,
 }: any) => {
   const getData = async () => {
-    const candleData = await getCandles({
+    const candleData = await getCandlesBigData({
       instrument: assetName,
       params: {
         from: startTime,
@@ -68,6 +75,28 @@ export const SidePanel = ({
     }
   };
 
+  const runBacktest = () => {
+    const data = candleData.map(({ x, y }: any, index: number) => {
+      return {
+        o: y[0],
+        h: y[1],
+        l: y[2],
+        c: y[3],
+        time: x,
+      };
+    });
+    const smaSeries = smaData.map(({ y }: any) => y);
+    const { trades, transactions } = meanReversion_A({
+      candles: data,
+      smaSeries,
+      buyRange: 0.2,
+      units: 1000,
+    });
+    setTrades(trades);
+    setTransactions(transactions);
+    console.log({ trades, transactions });
+  };
+
   return (
     <OuterWrapper $isSidePanel={isSidePanel}>
       <InnerWrapper $isSidePanel={isSidePanel}>
@@ -89,7 +118,8 @@ export const SidePanel = ({
         <SubmitBottom onClick={async () => await getData()}>
           Get Data
         </SubmitBottom>
-        <StrategyForm
+        {/* <p>{Description}</p> */}
+        {/* <StrategyForm
           strategyType={strategyType}
           setStrategyType={setStrategyType}
           strategyName={strategyName}
@@ -102,7 +132,10 @@ export const SidePanel = ({
           setIsProfitTarget={setIsProfitTarget}
           profitTarget={profitTarget}
           setProfitTarget={setProfitTarget}
-        />
+        /> */}
+        <SubmitBottom onClick={runBacktest} disabled={!candleData.length}>
+          Run
+        </SubmitBottom>
       </InnerWrapper>
     </OuterWrapper>
   );

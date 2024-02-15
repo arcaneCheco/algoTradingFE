@@ -1,35 +1,25 @@
 import {
   Candle,
-  CandleWithSpreadAndSMA,
-  OpenPosition,
+  OpenTrade,
+  PositionStatus,
   Signal,
   Trade,
 } from "@src/types/types";
 import { finalizePosition } from "./finalizePosition";
-import { BacktestData } from "./backtest";
 
 const closePositionsUtil = ({
   openPositions,
   exitPosition,
   closeLongPositions,
-  includeSpreads,
 }: {
-  openPositions: Array<OpenPosition>;
-  exitPosition: OpenPosition;
+  openPositions: Array<OpenTrade>;
+  exitPosition: OpenTrade;
   closeLongPositions: boolean;
-  includeSpreads: boolean;
 }) => {
   const finalizedTrades: Array<Trade> = [];
   const openPositionsLeft = openPositions.filter((openPosition) => {
-    if (
-      openPosition.signal ===
-      (closeLongPositions ? Signal.BUY : Signal.SELLSHORT)
-    ) {
-      const trade = finalizePosition(
-        openPosition,
-        exitPosition,
-        includeSpreads
-      );
+    if (openPosition.signal === (closeLongPositions ? "BUY" : "SELLSHORT")) {
+      const trade = finalizePosition(openPosition, exitPosition);
       finalizedTrades.push(trade);
       return false;
     }
@@ -41,38 +31,36 @@ const closePositionsUtil = ({
 export const executeTrade = ({
   signal,
   trades,
-  openPositions,
+  openTrades,
+  currentPosition,
   candle,
-  includeSpreads,
 }: {
   signal: Signal;
   trades: Array<Trade>;
-  openPositions: Array<OpenPosition>;
-  candle: BacktestData;
-  includeSpreads: boolean;
+  openTrades: Array<OpenTrade>;
+  currentPosition: PositionStatus;
+  candle: Candle;
 }): {
   trades: Array<Trade>;
-  openPositions: Array<OpenPosition>;
+  openTrades: Array<OpenTrade>;
+  currentPosition: PositionStatus;
 } => {
-  const { c, time, ask, bid } = candle;
-  const newPosition: OpenPosition = {
+  const { c, time } = candle;
+  const newPosition: OpenTrade = {
     signal,
     time,
     price: c,
-    askPrice: ask,
-    bidPrice: bid,
   };
 
-  let newPositions: Array<OpenPosition> = [];
+  let newPositions: Array<OpenTrade> = [];
   let newTrades = [...trades];
 
-  if (signal === Signal.BUY) {
+  if (signal === "BUY") {
     // cover short positions
     const { finalizedTrades, openPositionsLeft } = closePositionsUtil({
       openPositions,
       exitPosition: newPosition,
       closeLongPositions: false,
-      includeSpreads,
     });
     newPositions = [...openPositionsLeft];
     newTrades = [...newTrades, ...finalizedTrades];
@@ -84,13 +72,12 @@ export const executeTrade = ({
 
     return { openPositions: newPositions, trades: newTrades };
   }
-  if (signal === Signal.SELLSHORT) {
+  if (signal === "SELLSHORT") {
     // close open positions
     const { finalizedTrades, openPositionsLeft } = closePositionsUtil({
       openPositions,
       exitPosition: newPosition,
       closeLongPositions: true,
-      includeSpreads,
     });
     newPositions = [...openPositionsLeft];
     newTrades = [...newTrades, ...finalizedTrades];
@@ -103,26 +90,24 @@ export const executeTrade = ({
 
     return { openPositions: newPositions, trades: newTrades };
   }
-  if (signal === Signal.BUYTOCOVER) {
+  if (signal === "BUYTOCOVER") {
     // close short positions
     const { finalizedTrades, openPositionsLeft } = closePositionsUtil({
       openPositions,
       exitPosition: newPosition,
       closeLongPositions: false,
-      includeSpreads,
     });
     newPositions = [...openPositionsLeft];
     newTrades = [...newTrades, ...finalizedTrades];
 
     return { openPositions: newPositions, trades: newTrades };
   }
-  if (signal === Signal.SELL) {
+  if (signal === "SELL") {
     // close long positions
     const { finalizedTrades, openPositionsLeft } = closePositionsUtil({
       openPositions,
       exitPosition: newPosition,
       closeLongPositions: true,
-      includeSpreads,
     });
     newPositions = [...openPositionsLeft];
     newTrades = [...newTrades, ...finalizedTrades];
@@ -130,5 +115,5 @@ export const executeTrade = ({
     return { openPositions: newPositions, trades: newTrades };
   }
   // if HOLD
-  return { trades, openPositions };
+  return { trades, openTrades: openPositions, currentPosition: "NONE" };
 };

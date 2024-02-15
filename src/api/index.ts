@@ -20,6 +20,54 @@ const defaultOptions = {
   },
 };
 
+const granularityToSeconds: Record<any, number> = {
+  H1: 60 * 60,
+  H2: 2 * 60 * 60,
+  H4: 4 * 60 * 60,
+  H12: 12 * 60 * 60,
+  D: 24 * 60 * 60,
+};
+
+export const getCandlesBigData = async (
+  { instrument, params }: ICandles,
+  currentData: Array<any> = [],
+  first: boolean = true
+): Promise<any> => {
+  let finalTo = new Date(params.to!).getTime();
+  let currentTo =
+    new Date(params.from!).getTime() +
+    5000 * 1000 * granularityToSeconds[params.granularity!];
+  let final = false;
+  if (currentTo > finalTo) {
+    currentTo = finalTo;
+    final = true;
+  }
+
+  const candleSegment = await getCandles({
+    instrument,
+    params: {
+      ...params,
+      to: new Date(currentTo).toISOString(),
+      includeFirst: first,
+    },
+  });
+
+  const candles = [...currentData, ...candleSegment];
+
+  if (final) {
+    return candles;
+  } else {
+    return await getCandlesBigData(
+      {
+        instrument,
+        params: { ...params, from: new Date(currentTo).toISOString() },
+      },
+      candles,
+      false
+    );
+  }
+};
+
 export const getCandles = async ({ instrument, params }: ICandles) => {
   try {
     const queryString = assembleQueryString(params);
@@ -30,7 +78,32 @@ export const getCandles = async ({ instrument, params }: ICandles) => {
       headers: defaultOptions.headers,
     });
     const data = await response.json();
-    // console.log({ data });
+
+    // if (
+    //   data.errorMessage &&
+    //   data.errorMessage === "Maximum value for 'count' exceeded"
+    // ) {
+    //   console.log("hey");
+    //   const params2 = { ...params };
+    //   delete params2.to;
+    //   const queryString = assembleQueryString({
+    //     ...params2,
+    //     count: 5000,
+    //   });
+    //   const url = `${baseUrl}/v3/instruments/${instrument}/candles${queryString}`;
+    //   const response = await fetch(url, {
+    //     method: "GET",
+    //     headers: defaultOptions.headers,
+    //   });
+    //   const res2 = await response.json();
+    //   console.log({ res2 });
+    //   return [];
+    // }
+    if (data.errorMessage) {
+      throw new Error(data.errorMessage);
+    }
+    // return;
+    console.log({ data });
     // return data;
     const candles = data.candles.map(({ time, mid }: any) => ({
       o: Number(mid.o),
@@ -43,6 +116,7 @@ export const getCandles = async ({ instrument, params }: ICandles) => {
     return candles;
   } catch (error) {
     console.log({ error });
+    return [];
   }
 };
 

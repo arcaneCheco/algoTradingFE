@@ -4,13 +4,13 @@ export const profitTarget = (
   entryPrice: number,
   closingPrice: number,
   profitDistancePct: number
-) => {
+): Signal | null => {
   const profitDistance = profitDistancePct / 100;
   if (closingPrice >= entryPrice * (1 + profitDistance)) {
-    return Signal.SELL;
+    return "SELL";
   }
   if (closingPrice <= entryPrice * (1 - profitDistance)) {
-    return Signal.BUYTOCOVER;
+    return "BUYTOCOVER";
   }
   return null;
 };
