@@ -1,15 +1,15 @@
-import { useMyStore } from "@src/store";
+// import { useMyStore } from "@src/store";
 import { computeDrawdown } from "@src/utils";
 import Chart from "react-apexcharts";
 import styled from "styled-components";
 
 export const DrawdownPlot = () => {
-  const trades = useMyStore.use.trades();
-  const startingCapital = useMyStore.use.startingCapital();
-  const drawdown = computeDrawdown(startingCapital, trades);
+  // const trades = useMyStore.use.trades();
+  // const startingCapital = useMyStore.use.startingCapital();
+  // const drawdown = computeDrawdown(startingCapital, trades);
   return (
     <ChartWrapper>
-      <Chart
+      {/* <Chart
         height={365}
         series={[
           {
@@ -54,7 +54,7 @@ export const DrawdownPlot = () => {
             },
           },
         }}
-      />
+      /> */}
     </ChartWrapper>
   );
 };

@@ -24,6 +24,7 @@ const granularityToSeconds: Record<any, number> = {
   H1: 60 * 60,
   H2: 2 * 60 * 60,
   H4: 4 * 60 * 60,
+  H8: 8 * 60 * 60,
   H12: 12 * 60 * 60,
   D: 24 * 60 * 60,
 };
@@ -79,30 +80,10 @@ export const getCandles = async ({ instrument, params }: ICandles) => {
     });
     const data = await response.json();
 
-    // if (
-    //   data.errorMessage &&
-    //   data.errorMessage === "Maximum value for 'count' exceeded"
-    // ) {
-    //   console.log("hey");
-    //   const params2 = { ...params };
-    //   delete params2.to;
-    //   const queryString = assembleQueryString({
-    //     ...params2,
-    //     count: 5000,
-    //   });
-    //   const url = `${baseUrl}/v3/instruments/${instrument}/candles${queryString}`;
-    //   const response = await fetch(url, {
-    //     method: "GET",
-    //     headers: defaultOptions.headers,
-    //   });
-    //   const res2 = await response.json();
-    //   console.log({ res2 });
-    //   return [];
-    // }
     if (data.errorMessage) {
       throw new Error(data.errorMessage);
     }
-    // return;
+
     console.log({ data });
     // return data;
     const candles = data.candles.map(({ time, mid }: any) => ({

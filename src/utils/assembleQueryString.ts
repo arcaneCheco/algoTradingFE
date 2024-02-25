@@ -1,3 +1,5 @@
+import { Entries } from "@src/types/types";
+
 export const assembleQueryString = (queryParams?: { [key: string]: any }) => {
   if (!queryParams) return "";
 

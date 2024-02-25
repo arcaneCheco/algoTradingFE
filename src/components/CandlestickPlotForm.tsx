@@ -1,18 +1,18 @@
 import styled from "styled-components";
 import { getCandles } from "@src/api";
-import { useMyStore } from "@src/store";
+// import { useMyStore } from "@src/store";
 import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
 
 export const CandlestickPlotForm = () => {
-  const assetName = useMyStore.use.assetName();
-  const updateAssetName = useMyStore.use.updateAssetName();
-  const startTime = useMyStore.use.startTime();
-  const setStartTime = useMyStore.use.setStartTime();
-  const endTime = useMyStore.use.endTime();
-  const setEndTime = useMyStore.use.setEndTime();
-  const granularity = useMyStore.use.granularity();
-  const setGranularity = useMyStore.use.setGranularity();
-  const setCandleData = useMyStore.use.setCandleData();
+  // const assetName = useMyStore.use.assetName();
+  // const updateAssetName = useMyStore.use.updateAssetName();
+  // const startTime = useMyStore.use.startTime();
+  // const setStartTime = useMyStore.use.setStartTime();
+  // const endTime = useMyStore.use.endTime();
+  // const setEndTime = useMyStore.use.setEndTime();
+  // const granularity = useMyStore.use.granularity();
+  // const setGranularity = useMyStore.use.setGranularity();
+  // const setCandleData = useMyStore.use.setCandleData();
 
   return (
     <Wrapper
@@ -31,33 +31,33 @@ export const CandlestickPlotForm = () => {
     >
       <input
         placeholder="asset"
-        value={assetName}
-        onChange={(event) => updateAssetName(event.currentTarget.value)}
+        // value={assetName}
+        // onChange={(event) => updateAssetName(event.currentTarget.value)}
       />
       <input
         type="datetime-local"
         id="start"
         name="start"
-        value={startTime}
+        // value={startTime}
         onChange={(event) => {
           const val = event.currentTarget.value;
-          setStartTime(val);
+          // setStartTime(val);
         }}
       />
       <input
         type="datetime-local"
         name="endTime"
-        value={endTime}
+        // value={endTime}
         onChange={(event) => {
           const val = event.currentTarget.value;
-          setEndTime(val);
+          // setEndTime(val);
         }}
       />
       <select
         id="granularity"
-        value={granularity}
+        // value={granularity}
         onChange={(event) => {
-          setGranularity(event.currentTarget.value as CandlestickGranularity);
+          // setGranularity(event.currentTarget.value as CandlestickGranularity);
         }}
       >
         <option value="S5">S5</option>

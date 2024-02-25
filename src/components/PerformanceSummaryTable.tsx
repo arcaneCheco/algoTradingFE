@@ -1,15 +1,15 @@
 import styled from "styled-components";
 import { PerformanceSummary } from "@src/types/types";
 import { getPerformanceSummary } from "@src/utils";
-import { useMyStore } from "@src/store";
+// import { useMyStore } from "@src/store";
 
 export const PerformanceSummaryTable = () => {
-  const trades = useMyStore.use.trades();
-  const startingCapital = useMyStore.use.startingCapital();
-  const performanceData = getPerformanceSummary(startingCapital, trades);
+  // const trades = useMyStore.use.trades();
+  // const startingCapital = useMyStore.use.startingCapital();
+  // const performanceData = getPerformanceSummary(startingCapital, trades);
   return (
     <Wrapper>
-      <Table>
+      {/* <Table>
         <TBody>
           <TableRow>
             <TableHeader>Property</TableHeader>
@@ -24,7 +24,7 @@ export const PerformanceSummaryTable = () => {
             );
           })}
         </TBody>
-      </Table>
+      </Table> */}
     </Wrapper>
   );
 };

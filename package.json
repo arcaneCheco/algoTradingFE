@@ -2,6 +2,8 @@
   "dependencies": {
     "apexcharts": "^3.45.1",
     "dotenv": "^16.4.1",
+    "freezer-js": "^0.14.1",
+    "multi-range-slider-react": "^2.0.7",
     "parcel": "^2.11.0",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",

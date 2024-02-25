@@ -1,43 +1,38 @@
-import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
-import { getCandles, getCandlesBigData } from "@src/api";
-import useStore, { DataParamSMA, IStrategy, Store } from "@src/store";
 import {
   Candle,
   IISetup,
   OpenTrade,
   PositionStatus,
-  SetupParam,
   Signal,
   Trade,
 } from "@src/types/types";
-import { sma } from "@src/utils";
 
 const Description = `
-    Indicators:
-        1. SIMPLE MOVING AVERAGE (SMA)
-    PARAMETERS:
-        1. BUY_RANGE
-        2. STOP_LOSS (OPTIONAL)
-        3. PROFIT_TARGET (OPTIONAL)
-        4. UNITS
-    Entry Criteria:
-        1. BUY
-            - close is below SMA
-            - close in in bottom BUY_RANGE% of the candle
-        2. SHORT
-            - close is above SMA
-            - close in in upper BUY_RANGE% of the candle
-    Exit Criteria:
-        1. SELL
-            - close is above SMA
-        2. BUY_TO_COVER
-            - close is below SMA
-        3. STOP_LOSS
-        4. PROFIT_TARGET
-    Approach:
-        - SINGLE_TRADE_ENTRY
-        - FIXED_POSITION_SIZE
-`;
+      Indicators:
+          1. SIMPLE MOVING AVERAGE (SMA)
+      PARAMETERS:
+          1. BUY_RANGE
+          2. STOP_LOSS (OPTIONAL)
+          3. PROFIT_TARGET (OPTIONAL)
+          4. UNITS
+      Entry Criteria:
+          1. BUY
+              - close is below SMA
+              - close in in bottom BUY_RANGE% of the candle
+          2. SHORT
+              - close is above SMA
+              - close in in upper BUY_RANGE% of the candle
+      Exit Criteria:
+          1. SELL
+              - close is above SMA
+          2. BUY_TO_COVER
+              - close is below SMA
+          3. STOP_LOSS
+          4. PROFIT_TARGET
+      Approach:
+          - FIXED_POSITION_SIZE
+          - CLOSE ALL TRAAES ON EXIT/REVERSE
+  `;
 
 const setup: IISetup = {
   instrument: {
@@ -62,7 +57,7 @@ const setup: IISetup = {
   },
   smaPeriod: {
     use: true,
-    optional: false,
+    optional: true,
     control: true,
   },
   stopLoss: {
@@ -222,129 +217,8 @@ const strategy = ({
   return { trades, transactions };
 };
 
-const runBatchTest = async () => {
-  const store = useStore.getState();
-  const {
-    instrument,
-    startTime,
-    endTime,
-    granularity,
-    smaPeriod,
-    controlParam,
-    activeParams,
-    stopLoss,
-  } = store;
-  console.log(store);
-  console.log({ instrument, startTime, endTime, granularity });
-  const candleData = await getCandlesBigData({
-    instrument,
-    params: {
-      from: startTime,
-      to: endTime,
-      granularity,
-    },
-  });
-
-  if (!controlParam) {
-    const additionalData = await getCandles({
-      instrument,
-      params: {
-        to: startTime,
-        count: `${smaPeriod.value}`,
-        granularity,
-      },
-    });
-    additionalData.pop();
-
-    console.log({ is: activeParams.stopLoss, stopLoss: stopLoss.value });
-
-    const res = strategy({
-      candles: candleData,
-      smaSeries: sma([...additionalData, ...candleData], smaPeriod.value),
-      buyRange: 0.2,
-      units: 1000,
-      stopLoss: activeParams.stopLoss ? stopLoss.value : undefined,
-    });
-
-    const results = [{ ...res, controlParam: 0 }];
-
-    // return results;
-    store.setResults(results);
-  }
-
-  if (controlParam === "smaPeriod") {
-    const additionalData = await getCandles({
-      instrument,
-      params: {
-        to: startTime,
-        count: `${smaPeriod.maxValue}`,
-        granularity,
-      },
-    });
-    additionalData.pop();
-
-    const results = [];
-
-    for (
-      let i = smaPeriod.minValue;
-      i <= smaPeriod.maxValue;
-      i += smaPeriod.stepSize
-    ) {
-      const smaSeries = sma(
-        [...additionalData.slice(-(i - 1)), ...candleData],
-        i
-      );
-      const { trades, transactions } = strategy({
-        candles: candleData,
-        smaSeries: smaSeries,
-        buyRange: 0.2,
-        units: 1000,
-      });
-      results.push({ trades, transactions, controlParam: i });
-    }
-
-    // return results;
-    store.setResults(results);
-  }
-
-  if (controlParam === "stopLoss") {
-    const additionalData = await getCandles({
-      instrument,
-      params: {
-        to: startTime,
-        count: `${smaPeriod.value}`,
-        granularity,
-      },
-    });
-    additionalData.pop();
-
-    const smaSeries = sma([...additionalData, ...candleData], smaPeriod.value);
-
-    const results = [];
-
-    for (
-      let i = stopLoss.minValue;
-      i <= stopLoss.maxValue;
-      i += stopLoss.stepSize
-    ) {
-      const { trades, transactions } = strategy({
-        candles: candleData,
-        smaSeries: smaSeries,
-        buyRange: 0.2,
-        units: 1000,
-        stopLoss: i,
-      });
-      results.push({ trades, transactions, controlParam: i });
-    }
-
-    // return results;
-    store.setResults(results);
-  }
-};
-
-export const meanReversion_A: IStrategy = {
+export const meanReversion_B = {
   setup,
   description: Description,
   func: strategy,
-  runBatchTest,
 };

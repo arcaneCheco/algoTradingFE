@@ -1,17 +1,17 @@
-import { useMyStore } from "@src/store";
+// import { useMyStore } from "@src/store";
 import { sma } from "@src/utils";
 import styled from "styled-components";
 
 export const Indicators = () => {
-  const candleData = useMyStore.use.candleData();
-  const setCandleData = useMyStore.use.setCandleData();
-  const smaPeriod = useMyStore.use.smaPeriod();
-  const setSMAPeriod = useMyStore.use.setSMAPeriod();
-  //   const smaData = useMyStore.use.smaData();
-  const setSMAData = useMyStore.use.setSMAData();
+  // const candleData = useMyStore.use.candleData();
+  // const setCandleData = useMyStore.use.setCandleData();
+  // const smaPeriod = useMyStore.use.smaPeriod();
+  // const setSMAPeriod = useMyStore.use.setSMAPeriod();
+  // //   const smaData = useMyStore.use.smaData();
+  // const setSMAData = useMyStore.use.setSMAData();
   return (
     <Wrapper>
-      <SMAWrapper>
+      {/* <SMAWrapper>
         <p>SMA: </p>
         <input
           placeholder="periods"
@@ -29,7 +29,7 @@ export const Indicators = () => {
         >
           compute
         </button>
-      </SMAWrapper>
+      </SMAWrapper> */}
     </Wrapper>
   );
 };

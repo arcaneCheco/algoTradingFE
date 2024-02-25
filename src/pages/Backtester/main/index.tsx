@@ -4,7 +4,7 @@ import { Content } from "./Content";
 import { useState } from "react";
 
 export const Backtester = () => {
-  const [isSidePanel, setIsSidePanel] = useState(false);
+  const [isSidePanel, setIsSidePanel] = useState(true);
   const [assetName, setAssetName] = useState("EUR_USD");
   const [startTime, setStartTime] = useState(
     new Date(new Date().getTime() - 1000 * 60 * 60 * 24 * 365).toISOString()

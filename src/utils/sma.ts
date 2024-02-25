@@ -1,9 +1,4 @@
-import {
-  Candle,
-  CandleWithSMA,
-  CandleWithSpread,
-  CandleWithSpreadAndSMA,
-} from "@src/types/types";
+import { Candle } from "@src/types/types";
 
 export const sma = (candles: Array<Candle>, period: number, places = 5) => {
   return candles
@@ -17,5 +12,5 @@ export const sma = (candles: Array<Candle>, period: number, places = 5) => {
       );
       return sma;
     })
-    .slice(period - 1);
+    .slice(period - 1) as number[];
 };

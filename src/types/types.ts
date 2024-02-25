@@ -1,3 +1,5 @@
+import { Store } from "@src/store";
+
 export enum PricingComponent {
   M = "M",
   B = "B",
@@ -38,12 +40,55 @@ export interface OpenTrade {
   price: number;
   signal: Signal;
   holdingPeriod: number;
+  stopLossPrice: number;
   // direction: PositionStatus;
 }
 
 export type PositionStatus = "NONE" | "LONG" | "SHORT";
 
 export type Nullable<T> = T | null;
+
+export type Entries<T> = {
+  [K in keyof T]: [K, T[K]];
+}[keyof T][];
+
+export interface ParamSetup {
+  use: boolean;
+  optional: boolean;
+  control: boolean;
+}
+
+export type SetupParam = keyof Pick<
+  Store,
+  | "instrument"
+  | "startTime"
+  | "endTime"
+  | "granularity"
+  | "smaPeriod"
+  | "stopLoss"
+>;
+
+export type IISetup = Partial<Record<SetupParam, ParamSetup>>;
+
+export interface IPerformanceSummary {
+  controlParam: number;
+  positionSize: number;
+  monthlyProfit: number;
+  yearlyProfit: number;
+  netProfit: number;
+  barCount: number;
+  totalTrades: number;
+  numWinningTrades: number;
+  numLosingTrades: number;
+  winRate: number;
+  loseRate: number;
+  averageWinningTrade: number;
+  averageLosingTrade: number;
+  averageProfitPerTrade: number;
+  averageHoldingPeriodBars: number;
+  averageHoldingPeriodDays: number;
+  maxDrawdown: number;
+}
 
 // export interface Trade {
 //   entryTime: string;

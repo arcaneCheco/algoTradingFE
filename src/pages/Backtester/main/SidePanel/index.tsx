@@ -4,7 +4,7 @@ import { StrategyForm } from "./StrategyForm";
 import { getCandles, getCandlesBigData } from "@src/api";
 import { backtest, sma } from "@src/utils";
 // import * as STRATEGIES from "@src/strategies";
-import { meanReversion_A, Description } from "@src/strategies/MeanReversion_A";
+// import { meanReversion_A, Description } from "@src/strategies/MeanReversion_A";
 import { CopyBlock } from "react-code-blocks";
 
 export const SidePanel = ({

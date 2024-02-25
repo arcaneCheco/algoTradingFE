@@ -4,3 +4,4 @@ import styled from "styled-components";
 // import * as STRATEGIES from "@src/strategies";
 
 export * from "./main";
+export * from "./ChooseStrategy";
