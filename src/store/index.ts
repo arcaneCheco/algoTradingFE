@@ -1,6 +1,18 @@
 import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
-import { IISetup, SetupParam } from "@src/types/types";
-import { entriesFromObject } from "@src/utils";
+import { getCandlesBigData } from "@src/api";
+import {
+  BacktestResult,
+  BacktestResultWithControlParam,
+  Candle,
+  IISetup,
+  IPerformanceSummary,
+  SetupParam,
+} from "@src/types/types";
+import {
+  entriesFromObject,
+  getPerformanceSummary,
+  keysFromObject,
+} from "@src/utils";
 import { create, StateCreator, StoreApi } from "zustand";
 
 // export type SetupParam =
@@ -33,8 +45,9 @@ import { create, StateCreator, StoreApi } from "zustand";
 export interface IStrategy {
   setup: IISetup;
   description: any;
-  func: any;
-  runBatchTest: any;
+  func: (args: any) => BacktestResult;
+  // runBatchTest: () => Promise<Array<BacktestResult & { controlParam: any }>>;
+  runBatchTest: () => Promise<void>;
 }
 
 // interface DataArgs {
@@ -110,8 +123,11 @@ export interface StoreProps {
   // strategy
   strategy: IStrategy;
   // results
-  candles: Array<any>;
-  results: Array<any>;
+  candles: Array<Candle>;
+  additionalCandles: Array<Candle>;
+  results: Array<BacktestResultWithControlParam>;
+  selectedResult: BacktestResultWithControlParam;
+  performanceSummaries: Array<IPerformanceSummary>;
 }
 
 export interface Store extends StoreProps {
@@ -127,8 +143,13 @@ export interface Store extends StoreProps {
   // strategy
   setStrategy: (strategy: IStrategy) => void;
   // results
-  setResults: (results: any) => void;
+  setResults: (results: Array<BacktestResultWithControlParam>) => void;
   clear: () => void;
+  setSelectedResult: (selectedResult: BacktestResultWithControlParam) => void;
+  getCandles: () => void;
+  setPerformanceSummaries: (
+    performanceSummaries: Array<IPerformanceSummary>
+  ) => void;
 }
 
 const initialStore: StoreProps = {
@@ -140,7 +161,7 @@ const initialStore: StoreProps = {
   endTime: new Date(new Date().getTime() - 1000 * 60 * 60 * 24).toISOString(),
   granularity: "D",
   smaPeriod: {
-    value: 40,
+    value: 60,
     stepSize: 5,
     minStep: 1,
     min: 2,
@@ -157,7 +178,7 @@ const initialStore: StoreProps = {
     minValue: 1,
     maxValue: 10,
   },
-  controlParam: "smaPeriod",
+  controlParam: null,
   activeParams: {
     instrument: true,
     startTime: true,
@@ -167,16 +188,28 @@ const initialStore: StoreProps = {
     stopLoss: true,
   },
   strategy: {
+    // @ts-ignore
     func: () => {},
     description: "",
     setup: {},
+    // @ts-ignore
     runBatchTest: () => {},
   },
   candles: [],
   results: [],
+  selectedResult: {
+    trades: [],
+    openTrades: [],
+    transactions: [],
+    controlParam: 0,
+    additionalData: {
+      smaSeries: [],
+    },
+  },
+  performanceSummaries: [],
 };
 
-const useStore = create<Store>((set) => ({
+const useStore = create<Store>((set, get) => ({
   ...initialStore,
   setIsSidePanel: (isSidePanel) => set(() => ({ isSidePanel })),
   setInstrument: (instrument) => set(() => ({ instrument })),
@@ -204,16 +237,51 @@ const useStore = create<Store>((set) => ({
     });
   },
   setStrategy: (strategy) =>
-    set(() => ({
-      strategy: {
-        func: strategy.func,
-        description: strategy.description,
-        setup: strategy.setup,
-        runBatchTest: strategy.runBatchTest,
-      },
-    })),
-  setResults: (results) => set(() => ({ results })),
+    set((state) => {
+      const activeParams = keysFromObject(state.activeParams).reduce(
+        (acc, current) => {
+          const updatedParams = { ...acc };
+          updatedParams[current] = !!strategy.setup[current];
+          return updatedParams;
+        },
+        {} as Record<SetupParam, boolean>
+      );
+      console.log({ activeParams });
+      return {
+        ...state,
+        strategy: {
+          func: strategy.func,
+          description: strategy.description,
+          setup: strategy.setup,
+          runBatchTest: strategy.runBatchTest,
+        },
+        activeParams,
+      };
+    }),
+  setResults: (results) =>
+    set((state) => {
+      const performanceSummaries = results.map((tr) => ({
+        ...getPerformanceSummary(tr.trades, state.granularity),
+        controlParam: tr.controlParam,
+      }));
+      return { ...state, results, performanceSummaries };
+    }),
+  setPerformanceSummaries: (performanceSummaries) =>
+    set(() => ({ performanceSummaries })),
   clear: () => set((state) => ({ ...state, ...initialStore })),
+  setSelectedResult: (selectedResult) => set(() => ({ selectedResult })),
+  getCandles: async () => {
+    const { instrument, startTime, endTime, granularity } = get();
+    const candleData = await getCandlesBigData({
+      instrument,
+      params: {
+        from: startTime,
+        to: endTime,
+        granularity,
+      },
+    });
+    set(() => ({ candles: candleData }));
+  },
 }));
 
 export default useStore;

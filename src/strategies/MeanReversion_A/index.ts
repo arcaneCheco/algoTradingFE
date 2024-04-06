@@ -219,7 +219,12 @@ const strategy = ({
     }
   });
 
-  return { trades, transactions };
+  const openTrades: Array<OpenTrade> = [];
+  if (openTrade) {
+    openTrades.push(openTrade);
+  }
+
+  return { trades, transactions, openTrades };
 };
 
 const runBatchTest = async () => {
@@ -294,13 +299,13 @@ const runBatchTest = async () => {
         [...additionalData.slice(-(i - 1)), ...candleData],
         i
       );
-      const { trades, transactions } = strategy({
+      const { trades, transactions, openTrades } = strategy({
         candles: candleData,
         smaSeries: smaSeries,
         buyRange: 0.2,
         units: 1000,
       });
-      results.push({ trades, transactions, controlParam: i });
+      results.push({ trades, transactions, openTrades, controlParam: i });
     }
 
     // return results;
@@ -327,14 +332,14 @@ const runBatchTest = async () => {
       i <= stopLoss.maxValue;
       i += stopLoss.stepSize
     ) {
-      const { trades, transactions } = strategy({
+      const { trades, transactions, openTrades } = strategy({
         candles: candleData,
         smaSeries: smaSeries,
         buyRange: 0.2,
         units: 1000,
         stopLoss: i,
       });
-      results.push({ trades, transactions, controlParam: i });
+      results.push({ trades, transactions, openTrades, controlParam: i });
     }
 
     // return results;

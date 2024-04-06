@@ -90,6 +90,16 @@ export interface IPerformanceSummary {
   maxDrawdown: number;
 }
 
+export interface BacktestResult {
+  trades: Array<Trade>;
+  transactions: Array<any>;
+  openTrades: Array<OpenTrade>;
+  additionalData?: any;
+}
+
+export type BacktestResultWithControlParam = BacktestResult & {
+  controlParam: any;
+};
 // export interface Trade {
 //   entryTime: string;
 //   entryPrice: number;

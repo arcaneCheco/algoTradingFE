@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { entriesFromObject, getPerformanceSummary } from "@src/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Trade, IPerformanceSummary, Nullable } from "@src/types/types";
 import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
 import useStore from "@src/store";
@@ -62,9 +62,11 @@ const initialHeaders: THeaders = {
 export const PerformanceSummary = () => {
   const store = useStore();
 
-  const granularity = store.granularity;
-
   const controlParam = store.controlParam;
+
+  const setPerformanceSummaries = store.setPerformanceSummaries;
+
+  const performanceSummaries = store.performanceSummaries;
 
   const [headers, setHeaders] = useState<THeaders>(initialHeaders);
 
@@ -74,19 +76,6 @@ export const PerformanceSummary = () => {
       controlParam: { name: controlParam || "control param", order: 0 },
     });
   }, [controlParam]);
-
-  const [results, setResults] = useState<Array<IPerformanceSummary>>([]);
-
-  useEffect(() => {
-    console.log("HELLO REUSLTS");
-    const res = store.results.map((tr: any) => ({
-      ...getPerformanceSummary(tr.trades, granularity),
-      controlParam: tr.controlParam,
-    }));
-    setResults(res);
-  }, [store.results]);
-
-  console.log(results);
 
   const [sortBy, setSortBy] =
     useState<keyof IPerformanceSummary>("controlParam");
@@ -113,8 +102,56 @@ export const PerformanceSummary = () => {
     return t;
   };
 
+  const [displayResultIndex, setDisplayResultIndex] = useState(-1);
+
+  const $wrapper = useRef<HTMLDivElement>(null);
+
+  const [scrollIndicatorShadow, setScrollIndicatorShadow] = useState("");
+
+  const scrollHandler = () => {
+    // linear-gradient(#ffffff, #00000000 20%) center top,
+    // linear-gradient(#00000000 80%, #ffffff) center bottom;
+    let s = "";
+    if ($wrapper && $wrapper.current) {
+      const {
+        offsetHeight,
+        scrollHeight,
+        scrollTop,
+        scrollWidth,
+        offsetWidth,
+        scrollLeft,
+      } = $wrapper.current;
+      // console.log({ offsetHeight, scrollHeight, scrollTop });
+      if (scrollTop > 0) {
+        s += ",linear-gradient(#ffffff, #00000000 20%) center top";
+      }
+      if (scrollHeight - offsetHeight > scrollTop) {
+        s += ",linear-gradient(#00000000 80%, #ffffff) center bottom";
+      }
+      if (scrollWidth - offsetWidth > scrollLeft) {
+        s += ",linear-gradient(to left, #ffffff, #00000000 10%) center left";
+      }
+      if (scrollLeft > 0) {
+        s += ",linear-gradient(to left, #00000000 90%, #ffffff) center right";
+      }
+
+      setScrollIndicatorShadow(s.substring(1));
+    }
+  };
+
+  useEffect(() => {
+    $wrapper?.current?.addEventListener("scroll", scrollHandler);
+
+    return () =>
+      $wrapper?.current?.removeEventListener("scroll", scrollHandler);
+  }, []);
+
+  if (!performanceSummaries.length) {
+    return null;
+  }
+
   return (
-    <Wrapper>
+    <Wrapper ref={$wrapper} $scrollIndicatorShadow={scrollIndicatorShadow}>
       <Table>
         <TBody>
           <TableRowHeader>
@@ -129,29 +166,45 @@ export const PerformanceSummary = () => {
 
                   let sortedResults;
                   if (name === sortBy) {
-                    sortedResults = results.sort(
+                    sortedResults = performanceSummaries.sort(
                       (summaryA, summaryB) =>
                         (summaryA[sortBy] - summaryB[sortBy]) *
                         (sortOrder ? -1 : 1)
                     );
                     setSortOrder(!sortOrder);
                   } else {
-                    sortedResults = results.sort(
+                    sortedResults = performanceSummaries.sort(
                       (summaryA, summaryB) => summaryA[name] - summaryB[name]
                     );
                     setSortOrder(true);
                   }
                   setSortBy(name);
-                  setResults(sortedResults);
+                  setPerformanceSummaries(sortedResults);
                 }}
               >
                 {name}
               </TableHeader>
             ))}
           </TableRowHeader>
-          {results.map((s, i) => {
+          {performanceSummaries.map((s, i) => {
             return (
-              <TableRow key={i + ""}>
+              <TableRow
+                key={i + ""}
+                $displayResult={i === displayResultIndex}
+                onClick={(event) => {
+                  const selectedResult = store.results.find(
+                    (r) => r.controlParam === s.controlParam
+                  );
+                  console.log(selectedResult);
+                  if (selectedResult) {
+                    store.setSelectedResult(selectedResult);
+                    setDisplayResultIndex(i);
+                  } else {
+                    setDisplayResultIndex(-1);
+                    console.error("DATA NOT FOUND");
+                  }
+                }}
+              >
                 {sortedTableRow(s).map(([prop, value]) => (
                   <TableCell key={prop} $selected={sortBy === prop}>
                     {value}
@@ -166,12 +219,12 @@ export const PerformanceSummary = () => {
   );
 };
 
-const Wrapper = styled.div`
-  margin-top: 50px;
-  padding: 0 50px;
-  height: fit-content;
+const Wrapper = styled.div<{ $scrollIndicatorShadow: string }>`
   display: flex;
-  justify-content: center;
+  overflow: auto;
+  background: ${(props) => props.$scrollIndicatorShadow};
+  min-height: 94px;
+  max-height: 300px;
 `;
 
 const Table = styled.table`
@@ -192,10 +245,13 @@ const TableRowHeader = styled.tr`
   font-size: 15px;
 `;
 
-const TableRow = styled(TableRowHeader)`
+const TableRow = styled(TableRowHeader)<{ $displayResult: boolean }>`
   &:hover {
     background-color: #ffe100a2;
   }
+  background-color: ${({ $displayResult }) =>
+    $displayResult ? "#40ff00a1" : ""};
+  cursor: pointer;
 `;
 
 const TableHeader = styled.th<{ $selected: boolean }>`

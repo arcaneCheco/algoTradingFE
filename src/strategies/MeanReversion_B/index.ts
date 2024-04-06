@@ -1,4 +1,6 @@
+import { IStrategy } from "@src/store";
 import {
+  BacktestResultWithControlParam,
   Candle,
   IISetup,
   OpenTrade,
@@ -6,6 +8,9 @@ import {
   Signal,
   Trade,
 } from "@src/types/types";
+import useStore from "@src/store";
+import { getCandles, getCandlesBigData } from "@src/api";
+import { sma } from "@src/utils";
 
 const Description = `
       Indicators:
@@ -57,12 +62,7 @@ const setup: IISetup = {
   },
   smaPeriod: {
     use: true,
-    optional: true,
-    control: true,
-  },
-  stopLoss: {
-    use: true,
-    optional: true,
+    optional: false,
     control: true,
   },
 };
@@ -91,7 +91,7 @@ const strategy = ({
   let signal: Signal = "HOLD";
   const trades: Array<Trade> = [];
   const transactions: Array<any> = [];
-  let openTrade: OpenTrade | null = null;
+  let openTrades: Array<OpenTrade> = [];
 
   candles.forEach((candle, index) => {
     const { c, l, h } = candle;
@@ -108,74 +108,80 @@ const strategy = ({
       signal = "BUYTOCOVER";
     }
 
-    let closePosition = false;
-    let openNewPosition = false;
-    let isReversal = false;
+    let closeOpenTrades = false;
+    let openNewTrade = false;
 
     switch (positionStatus) {
       case "LONG":
-        if (signal === "SELL" || signal === "SELLSHORT") {
-          closePosition = true;
-          if (signal === "SELLSHORT") {
-            openNewPosition = true;
-            isReversal = true;
-          }
+        if (signal === "BUY") {
+          openNewTrade = true;
         }
-        if (c < openTrade!.stopLossPrice) {
-          console.log("TRIGGER LONG");
-          closePosition = true;
+        if (signal === "SELL") {
+          closeOpenTrades = true;
+        }
+        if (signal === "SELLSHORT") {
+          closeOpenTrades = true;
+          openNewTrade = true;
         }
         break;
       case "SHORT":
-        if (signal === "BUY" || signal === "BUYTOCOVER") {
-          closePosition = true;
-          if (signal === "BUY") {
-            openNewPosition = true;
-            isReversal = true;
-          }
+        if (signal === "SELLSHORT") {
+          openNewTrade = true;
         }
-        if (c > openTrade!.stopLossPrice) {
-          console.log("TRIGGER SHORT");
-          closePosition = true;
+        if (signal === "BUYTOCOVER") {
+          closeOpenTrades = true;
         }
-        break;
+        if (signal === "BUY") {
+          closeOpenTrades = true;
+          openNewTrade = true;
+        }
       case "NONE":
         if (signal === "BUY" || signal === "SELLSHORT") {
-          openNewPosition = true;
+          openNewTrade = true;
         }
-        break;
       default:
         break;
     }
 
-    if (openTrade) {
-      openTrade.holdingPeriod++;
+    if (openTrades.length) {
+      openTrades.forEach((openTrade) => {
+        openTrade.holdingPeriod++;
+      });
     }
 
-    if (closePosition) {
-      if (!openTrade) {
+    let currentUnits = openTrades.length * units;
+    if (positionStatus === "SHORT") {
+      currentUnits *= -1;
+    }
+
+    if (closeOpenTrades) {
+      if (!openTrades.length) {
         throw new Error("Expected open position");
       }
-      const closedTrade: Trade = {
-        entryTime: openTrade.time,
-        entryPrice: openTrade.price,
-        entrySignal: openTrade.signal,
-        holdingPeriod: openTrade.holdingPeriod,
-        exitTime: candle.time,
-        exitPrice: c,
-        exitSignal: signal,
-        profitLoss:
+      openTrades.forEach((openTrade) => {
+        const profitLoss =
           positionStatus === "LONG"
             ? (c - openTrade.price) * units
-            : (openTrade.price - c) * units,
-        units,
-      };
-      trades.push(closedTrade);
-      openTrade = null;
+            : (openTrade.price - c) * units;
+
+        const closedTrade: Trade = {
+          entryTime: openTrade.time,
+          entryPrice: openTrade.price,
+          entrySignal: openTrade.signal,
+          holdingPeriod: openTrade.holdingPeriod,
+          exitTime: candle.time,
+          exitPrice: c,
+          exitSignal: signal,
+          profitLoss,
+          units,
+        };
+        trades.push(closedTrade);
+      });
+      openTrades = [];
       positionStatus = "NONE";
     }
 
-    if (openNewPosition) {
+    if (openNewTrade) {
       positionStatus = signal === "BUY" ? "LONG" : "SHORT";
       const stopLossDistance = ((stopLoss || 10000) / 100) * c;
       let stopLossPrice = c;
@@ -184,27 +190,25 @@ const strategy = ({
       } else {
         stopLossPrice += stopLossDistance;
       }
-      // console.log({ price: c, stopLossPrice });
-      openTrade = {
+      const newTrade = {
         time: candle.time,
         price: c,
         signal,
         holdingPeriod: 0,
         stopLossPrice,
+        units,
       };
+      openTrades.push(newTrade);
     }
 
-    const isTransaction = closePosition || openNewPosition;
+    const isTransaction = closeOpenTrades || openNewTrade;
     if (isTransaction) {
-      let positionSize = openTrade ? units : 0;
-      let transactionUnits = units;
-      if (isReversal) {
-        transactionUnits += units;
-      }
-      if (signal === "SELL" || signal === "SELLSHORT") {
-        transactionUnits *= -1;
+      let positionSize = openTrades.length * units;
+      if (positionStatus === "SHORT") {
         positionSize *= -1;
       }
+      const transactionUnits = positionSize - currentUnits;
+
       transactions.push({
         time: candle.time,
         units: transactionUnits,
@@ -214,11 +218,168 @@ const strategy = ({
     }
   });
 
-  return { trades, transactions };
+  return { trades, transactions, openTrades };
 };
 
-export const meanReversion_B = {
+const runBatchTest = async () => {
+  const store = useStore.getState();
+  const {
+    instrument,
+    startTime,
+    endTime,
+    granularity,
+    smaPeriod,
+    controlParam,
+    activeParams,
+    stopLoss,
+    candles,
+  } = store;
+
+  if (!controlParam) {
+    const additionalData = await getCandles({
+      instrument,
+      params: {
+        to: startTime,
+        count: `${smaPeriod.value}`,
+        granularity,
+      },
+    });
+    additionalData.pop();
+
+    const smaSeriess = sma([...additionalData, ...candles], smaPeriod.value);
+
+    const res = strategy({
+      candles: candles,
+      smaSeries: smaSeriess,
+      buyRange: 0.2,
+      units: 1000,
+      stopLoss: activeParams.stopLoss ? stopLoss.value : undefined,
+    });
+
+    const results: Array<BacktestResultWithControlParam> = [
+      { ...res, controlParam: 0, additionalData: { smaSeries: smaSeriess } },
+    ];
+
+    console.log({
+      results,
+      maxInvested: Math.max(...res.transactions.map((t) => t.positionSize)),
+    });
+
+    // return results;
+    store.setResults(results);
+  }
+
+  if (controlParam === "smaPeriod") {
+    const additionalData = await getCandles({
+      instrument,
+      params: {
+        to: startTime,
+        count: `${smaPeriod.maxValue}`,
+        granularity,
+      },
+    });
+    additionalData.pop();
+
+    const results: Array<BacktestResultWithControlParam> = [];
+
+    for (
+      let i = smaPeriod.minValue;
+      i <= smaPeriod.maxValue;
+      i += smaPeriod.stepSize
+    ) {
+      const smaSeries = sma([...additionalData.slice(-(i - 1)), ...candles], i);
+      const { trades, transactions, openTrades } = strategy({
+        candles: candles,
+        smaSeries: smaSeries,
+        buyRange: 0.2,
+        units: 1000,
+      });
+      results.push({
+        trades,
+        transactions,
+        openTrades,
+        controlParam: i,
+        additionalData: { smaSeries },
+      });
+    }
+
+    // return results;
+    store.setResults(results);
+  }
+
+  // if (controlParam === "smaPeriod") {
+  //   const additionalData = await getCandles({
+  //     instrument,
+  //     params: {
+  //       to: startTime,
+  //       count: `${smaPeriod.maxValue}`,
+  //       granularity,
+  //     },
+  //   });
+  //   additionalData.pop();
+
+  //   const results = [];
+
+  //   for (
+  //     let i = smaPeriod.minValue;
+  //     i <= smaPeriod.maxValue;
+  //     i += smaPeriod.stepSize
+  //   ) {
+  //     const smaSeries = sma(
+  //       [...additionalData.slice(-(i - 1)), ...candleData],
+  //       i
+  //     );
+  //     const { trades, transactions } = strategy({
+  //       candles: candleData,
+  //       smaSeries: smaSeries,
+  //       buyRange: 0.2,
+  //       units: 1000,
+  //     });
+  //     results.push({ trades, transactions, controlParam: i });
+  //   }
+
+  //   // return results;
+  //   store.setResults(results);
+  // }
+
+  // if (controlParam === "stopLoss") {
+  //   const additionalData = await getCandles({
+  //     instrument,
+  //     params: {
+  //       to: startTime,
+  //       count: `${smaPeriod.value}`,
+  //       granularity,
+  //     },
+  //   });
+  //   additionalData.pop();
+
+  //   const smaSeries = sma([...additionalData, ...candleData], smaPeriod.value);
+
+  //   const results = [];
+
+  //   for (
+  //     let i = stopLoss.minValue;
+  //     i <= stopLoss.maxValue;
+  //     i += stopLoss.stepSize
+  //   ) {
+  //     const { trades, transactions } = strategy({
+  //       candles: candleData,
+  //       smaSeries: smaSeries,
+  //       buyRange: 0.2,
+  //       units: 1000,
+  //       stopLoss: i,
+  //     });
+  //     results.push({ trades, transactions, controlParam: i });
+  //   }
+
+  //   // return results;
+  //   store.setResults(results);
+  // }
+};
+
+export const meanReversion_B: IStrategy = {
   setup,
   description: Description,
   func: strategy,
+  runBatchTest,
 };

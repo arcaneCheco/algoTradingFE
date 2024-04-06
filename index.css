@@ -29,3 +29,18 @@ body {
 .apexcharts-series-markers {
     pointer-events: all;
 }
+
+.canvasjs-chart-credit {
+    display: none;
+}
+
+/* .canvasjs-chart-panel {
+    position: relative!important;
+    top: initial!important;
+}
+
+.canvasjs-navigator-panel {
+    position: relative!important;
+    top: initial!important;
+    z-index: 1;
+} */

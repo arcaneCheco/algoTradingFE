@@ -13,13 +13,11 @@ export const Setup = () => {
   const controlParam = store.controlParam;
   const setup = store.strategy.setup;
   const activeParams = store.activeParams;
-  //   const setupConstants = keysFromObject(setup).filter(
-  //     (val) => (val !== controlParam)
-  //   );
+
   const setupConstants = keysFromObject(activeParams).filter(
-    (val) => activeParams[val] && val !== controlParam
+    (val) => activeParams[val] && val !== controlParam && !!setup[val]
   );
-  console.log({ setupConstants });
+
   return (
     <SetupWrapper>
       {setupConstants.map((param) => {
@@ -42,9 +40,8 @@ export const Setup = () => {
 
 const SetupWrapper = styled.div`
   display: flex;
-  margin-left: 50px;
-  margin-top: 50px;
   gap: 10px;
+  flex-wrap: wrap;
 `;
 const SetupItem = styled.div`
   display: flex;

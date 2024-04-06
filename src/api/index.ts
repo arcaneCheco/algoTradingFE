@@ -94,6 +94,7 @@ export const getCandles = async ({ instrument, params }: ICandles) => {
       time,
     }));
 
+    console.log({ candles });
     return candles;
   } catch (error) {
     console.log({ error });

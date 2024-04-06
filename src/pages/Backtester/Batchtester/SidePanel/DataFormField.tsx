@@ -163,7 +163,7 @@ const InputWrapper = styled.div`
   display: flex;
   position: relative;
   flex-direction: column;
-  width: 16%;
+  width: 60px;
   height: 100%;
   align-items: center;
 `;
