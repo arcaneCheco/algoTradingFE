@@ -2,17 +2,21 @@
 import CanvasJSReact from "@canvasjs/react-stockcharts";
 import useStore from "@src/store";
 import { useEffect, useRef } from "react";
+import { Button } from "./Graphs";
 
 var CanvasJSStockChart = CanvasJSReact.CanvasJSStockChart;
 
-export const ControlParamGraph = () => {
+export const ControlParamGraph = ({ hide }: { hide: () => void }) => {
   const { controlParam, performanceSummaries } = useStore();
   console.log({ controlParam, performanceSummaries });
 
-  const dataPoints = performanceSummaries.map((ps) => ({
-    x: ps.controlParam,
-    y: ps.netProfit,
-  }));
+  const dataPoints = performanceSummaries
+    .map((ps) => ({
+      x: ps.controlParam,
+      y: ps.netProfit,
+    }))
+    .sort((p1, p2) => p1.x - p2.x);
+  console.log(dataPoints);
   console.log({ dataPoints });
 
   const ref = useRef<any>(null);
@@ -27,8 +31,6 @@ export const ControlParamGraph = () => {
     }
   }, [dataPoints]);
 
-  if (!dataPoints.length) return null;
-
   const options = {
     rangeSelector: {
       inputFields: {
@@ -41,7 +43,6 @@ export const ControlParamGraph = () => {
     navigator: {
       enabled: false,
     },
-    // axisX: xRange,
     charts: [
       {
         interactivityEnabled: false,
@@ -51,23 +52,14 @@ export const ControlParamGraph = () => {
             dataPoints,
           },
         ],
-        height: 400,
       },
     ],
   };
-  //   return null;
 
   return (
     <>
-      <CanvasJSStockChart
-        options={options}
-        containerProps={{
-          // width: `${800}px`,
-          height: "450px",
-          position: "relative",
-        }}
-        ref={ref}
-      />
+      <CanvasJSStockChart options={options} ref={ref} />
+      <Button clickhandler={hide} copy={"hide control param plot"} />
     </>
   );
 };

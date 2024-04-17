@@ -3,10 +3,10 @@ import { PerformanceSummary } from "./PerformanceSummary";
 import useStore from "@src/store";
 import { Setup } from "./Setup";
 import { Graphs } from "./Graphs";
-import { ControlParamGraph } from "./ControlParamGraph";
 
 export const Content = () => {
   const { isSidePanel, setIsSidePanel, results } = useStore();
+
   return (
     <OuterWrapper>
       <Wrapper>
@@ -18,8 +18,7 @@ export const Content = () => {
         </OpenSidePanel>
         <Setup />
         <PerformanceSummary />
-        {results.length ? <Graphs /> : null}
-        <ControlParamGraph />
+        <Graphs />
       </Wrapper>
     </OuterWrapper>
   );

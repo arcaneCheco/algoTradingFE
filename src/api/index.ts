@@ -21,6 +21,9 @@ const defaultOptions = {
 };
 
 const granularityToSeconds: Record<any, number> = {
+  M10: 10 * 60,
+  M15: 15 * 60,
+  M30: 30 * 60,
   H1: 60 * 60,
   H2: 2 * 60 * 60,
   H4: 4 * 60 * 60,

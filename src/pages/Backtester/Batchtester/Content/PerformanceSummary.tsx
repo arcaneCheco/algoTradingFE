@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Trade, IPerformanceSummary, Nullable } from "@src/types/types";
 import { CandlestickGranularity } from "@lt_surge/algo-trading-shared-types";
 import useStore from "@src/store";
+import { WrapperWithScrollIndicator } from "./WrapperWithScrollIndicator";
 
 type RequiredKeys<T> = {
   [K in keyof T]-?: {} extends Pick<T, K> ? never : K;
@@ -104,54 +105,8 @@ export const PerformanceSummary = () => {
 
   const [displayResultIndex, setDisplayResultIndex] = useState(-1);
 
-  const $wrapper = useRef<HTMLDivElement>(null);
-
-  const [scrollIndicatorShadow, setScrollIndicatorShadow] = useState("");
-
-  const scrollHandler = () => {
-    // linear-gradient(#ffffff, #00000000 20%) center top,
-    // linear-gradient(#00000000 80%, #ffffff) center bottom;
-    let s = "";
-    if ($wrapper && $wrapper.current) {
-      const {
-        offsetHeight,
-        scrollHeight,
-        scrollTop,
-        scrollWidth,
-        offsetWidth,
-        scrollLeft,
-      } = $wrapper.current;
-      // console.log({ offsetHeight, scrollHeight, scrollTop });
-      if (scrollTop > 0) {
-        s += ",linear-gradient(#ffffff, #00000000 20%) center top";
-      }
-      if (scrollHeight - offsetHeight > scrollTop) {
-        s += ",linear-gradient(#00000000 80%, #ffffff) center bottom";
-      }
-      if (scrollWidth - offsetWidth > scrollLeft) {
-        s += ",linear-gradient(to left, #ffffff, #00000000 10%) center left";
-      }
-      if (scrollLeft > 0) {
-        s += ",linear-gradient(to left, #00000000 90%, #ffffff) center right";
-      }
-
-      setScrollIndicatorShadow(s.substring(1));
-    }
-  };
-
-  useEffect(() => {
-    $wrapper?.current?.addEventListener("scroll", scrollHandler);
-
-    return () =>
-      $wrapper?.current?.removeEventListener("scroll", scrollHandler);
-  }, []);
-
-  if (!performanceSummaries.length) {
-    return null;
-  }
-
   return (
-    <Wrapper ref={$wrapper} $scrollIndicatorShadow={scrollIndicatorShadow}>
+    <WrapperWithScrollIndicator>
       <Table>
         <TBody>
           <TableRowHeader>
@@ -190,15 +145,26 @@ export const PerformanceSummary = () => {
             return (
               <TableRow
                 key={i + ""}
-                $displayResult={i === displayResultIndex}
+                $displayResult={s.controlParam === displayResultIndex}
                 onClick={(event) => {
                   const selectedResult = store.results.find(
                     (r) => r.controlParam === s.controlParam
                   );
-                  console.log(selectedResult);
+                  console.log({ selectedResult });
                   if (selectedResult) {
+                    console.log(
+                      "IS SELECETED RESULT",
+                      s.controlParam,
+                      displayResultIndex
+                    );
+                    if (s.controlParam === displayResultIndex) {
+                      // click result that is already selected
+                      console.log("UNDIOOONG");
+                      store.setSelectedResult(null);
+                      setDisplayResultIndex(-1);
+                    }
                     store.setSelectedResult(selectedResult);
-                    setDisplayResultIndex(i);
+                    setDisplayResultIndex(s.controlParam);
                   } else {
                     setDisplayResultIndex(-1);
                     console.error("DATA NOT FOUND");
@@ -215,17 +181,9 @@ export const PerformanceSummary = () => {
           })}
         </TBody>
       </Table>
-    </Wrapper>
+    </WrapperWithScrollIndicator>
   );
 };
-
-const Wrapper = styled.div<{ $scrollIndicatorShadow: string }>`
-  display: flex;
-  overflow: auto;
-  background: ${(props) => props.$scrollIndicatorShadow};
-  min-height: 94px;
-  max-height: 300px;
-`;
 
 const Table = styled.table`
   width: fit-content;

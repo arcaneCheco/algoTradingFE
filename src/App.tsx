@@ -4,12 +4,9 @@ import { Layout } from "./pages/Layout";
 import { Backtester, ChooseStrategy } from "./pages/Backtester";
 import BacktesterNav from "./pages/Backtester/Layout";
 import { BatchTester } from "./pages/Backtester/Batchtester";
-import { useContext } from "react";
-// import { FreezerContext } from ".";
+import { SciChartTest } from "./pages/Backtester/SciChartTest";
 
 export const App = () => {
-  // const store = useContext(FreezerContext);
-  // console.log(store.get());
   return (
     <BrowserRouter>
       <Routes>
@@ -20,6 +17,7 @@ export const App = () => {
             <Route>
               <Route path="" element={<ChooseStrategy />} />
               <Route path=":strategy" element={<BatchTester />} />
+              <Route path="test" element={<SciChartTest />} />
             </Route>
           </Route>
         </Route>
